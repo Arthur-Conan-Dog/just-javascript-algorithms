@@ -502,6 +502,34 @@ var minSubarray = function (nums, p) {
 Note: [why (curr - mod + p) % p instead of (curr - mod) % p directly?](https://leetcode.com/problems/make-sum-divisible-by-p/discuss/854895/How-to-approach-this-kind-of-problem-mind-map) => Why in java solutions we have to do a lookup for (cur - target + p)%p but for python solutions we do lookup only for (cur - target)%p
 
 
+#### [Remove Zero Sum Consecutive Nodes from Linked List](https://leetcode.com/problems/remove-zero-sum-consecutive-nodes-from-linked-list/)
+
+list = [1, 2, -3, 3, 1]
+pref = [1, 3, 0, 3, 4]
+idx  = [0, 1, 2, 3, 4]
+
+=> [3,1]
+
+```js
+var removeZeroSumSublists = function (head) {
+  let prefix = 0,
+    map = {},
+    dummy = new ListNode(0);
+  dummy.next = head;
+  map[0] = dummy;
+  for (let i = dummy; i !== null; i = i.next) {
+    prefix += i.val;
+    map[prefix] = i;
+  }
+  prefix = 0;
+  for (let i = dummy; i !== null; i = i.next) {
+    prefix += i.val;
+    i.next = map[prefix].next;
+  }
+  return dummy.next;
+};
+```
+
 ## Flip Array Elements
 
 ### [Find All Numbers Disappeared in an Array](https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array/)
