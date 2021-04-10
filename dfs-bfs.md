@@ -688,3 +688,40 @@ function bfs(board, click) {
   return board;
 }
 ```
+
+### [Snakes and Ladders](https://leetcode.com/problems/snakes-and-ladders/)
+
+problems:
+
+1. how to find the minimum steps? => BFS, 1 step each time
+
+2. on what condition it is not possible? => all nodes traversed without hitting n * n.
+
+3. how to calc square => i, j mapping? => rowIdx = number / n, colIdx = number % n combine with (rowIdx is even or odd)
+
+```js
+var snakesAndLadders = function(board) {
+  let n = board.length, target = n * n, queue = [1], map = {1:0};
+  while (queue.length) {
+    let num = queue.shift();
+    if (num === target) return map[num];
+    for (let i = num + 1; i <= Math.min(num + 6, target); i++) {
+      let [x, y] = toIdx(i, n),
+          next = board[x][y] === -1 ? i : board[x][y];
+      if (map[next] === undefined) {
+        map[next] = map[num] + 1;
+        queue.push(next);
+      }
+    }
+  }
+  return -1;
+};
+
+function toIdx(num, n) {
+  let row = Math.floor((num - 1) / n),
+      col = (num - 1) % n;
+  col = (row % 2) === 0 ? col : n - 1 - col;
+  row = n - 1 - row;
+  return [row, col]
+};
+```
