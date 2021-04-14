@@ -4,7 +4,7 @@
 
 - 各种边界情况。如存在负数、0不能做除数，做加法和乘法时容易溢出等。
 
-- 边界值。JS 中 2^31 - 1 = 2147483647.
+- 边界值。如：2^31 - 1 = 2147483647。
 
 公式：
 
@@ -453,4 +453,48 @@ var canPlaceFlowers = function(flowerbed, n) {
     res += Math.floor(curr / 2);
     return res >= n;
 };
+```
+
+### [K-th Smallest in Lexicographical Order](https://leetcode.com/problems/k-th-smallest-in-lexicographical-order/)
+
+we don't really need to do a exact k steps traverse of the tree, the idea is to calculate the steps between curr and curr + 1 (neighbor nodes in same level), in order to skip some unnecessary moves, and:
+
+1. if the steps <= k, we know we can move to curr + 1, and narrow down k to k - steps.
+
+2. if the steps > k, that means the curr + 1 is too much, we need to go deeper into first child of curr, which is curr * 10, and repeat the iteration.
+
+steps += Math.min(max + 1, n2) - n1;
+why min(max + 1, n2) instead of min(max, n2)?
+If n2 is chosen, you add steps of the full amount of that layer of n1, 10/100/1000...
+If max is chosen, you need to count the first step of n1 in. eg. if n is 102, the steps are 100, 101, 102. you need 102 + 1 - 100.
+
+You will never have a chance to call calSteps(max, 19, 20), or calSteps(max, 199, 200), because calSteps(max, 1, 2) will be called first.
+If the result passes k, it means that you are done with the subtree of '1'. Next you will call calSteps(max, 2, 3). Otherwise, your target is under '1', and you will not ever touch the subtree of '2'. Next you will call calSteps(max, 10, 11).
+
+```js
+var findKthNumber = function (n, k) {
+    let curr = 1;
+    k = k - 1;
+    while (k > 0) {
+        let count = getNodeCountBetween(curr, curr + 1, n);
+        if (count <= k) {
+            curr = curr + 1;
+            k -= count;
+        } else {
+            curr *= 10;
+            k = k - 1;
+        }
+    }
+    return curr;
+};
+
+function getNodeCountBetween(n1, n2, max) {
+    let count = 0;
+    while (n1 <= max) {
+        count += Math.min(max + 1, n2) - n1;
+        n1 *= 10;
+        n2 *= 10;
+    }
+    return count;
+}
 ```
