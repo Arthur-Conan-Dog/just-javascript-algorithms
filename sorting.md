@@ -2,13 +2,13 @@
 
 general key points: stable / in-place / complexity
 
-🚨 注意：用 JS array 默认的 sort 方法排序结果会很奇怪，一定要给明确的 comparator。
+🚨 注意：JS array 的 sort 方法默认是按字典序排序，一定要给明确的 comparator。
 
 ## Simple sorts
 
 ### insertion sort
 
-Taking elements from the list one by one and inserting them in their correct position into a new sorted list.
+Start from pos = 1, compares it with its previous element, if it is smaller, means it needs to be placed ahead. Swap current with previous, continue this process until current element is at the right position, increase pos to 2, etc.
 
 #### key points
 
@@ -35,7 +35,7 @@ Taking elements from the list one by one and inserting them in their correct pos
 ```js
 function insertionSort(arr) {
   for (let i = 1; i < arr.length; i++) {
-    for (let j = i; j > 0 && arr[j - 1] > arr[j]; j--) {
+    for (let j = i; j > 0 && arr[j] < arr[j - 1]; j--) {
       let temp = arr[j];
       arr[j] = arr[j - 1];
       arr[j - 1] = temp;
@@ -46,7 +46,7 @@ function insertionSort(arr) {
 
 ### selection sort
 
-Finds the minimum value, swaps it with the value in the first position, and repeats these steps for the remainder of the list.
+Finds the minimum value, swaps it with the value at the first position, and repeats these steps for the remaining of the list.
 
 #### key points
 
