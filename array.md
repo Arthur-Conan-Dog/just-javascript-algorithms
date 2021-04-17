@@ -8,7 +8,7 @@ so, a & b 有交集（对上面的逻辑取反） => a.end >= b.start && a.start
 
 ### [Meeting Rooms](https://github.com/Seanforfun/Algorithm-and-Leetcode/blob/master/leetcode/252.%20Meeting%20Rooms.md)
 
-判断两区间是否有 overlap。
+determine whether two intervals have overlapping regions.
 
 ```js
 function meetingRooms(intervals) {
@@ -22,6 +22,8 @@ function meetingRooms(intervals) {
 ```
 
 ### [Merge Intervals](https://leetcode.com/problems/merge-intervals/)
+
+as the title says, merge given intervals.
 
 use a buffer interval to compare, if buffer has overlap with current interval, merge them and continue; if has no overlap, push buffer into res, and reset current interval as buffer.
 
@@ -45,7 +47,9 @@ var merge = function (intervals) {
 
 ### [Meeting Rooms II](https://github.com/Seanforfun/Algorithm-and-Leetcode/blob/master/leetcode/253.%20Meeting%20Rooms%20II.md)
 
-intervals 按照 start time 从小到大排序。
+find the minimum number of conference rooms required.
+
+sort intervals according to the start time.
 
 1. if currentMeeting.start < ongoingMeetingThatEndsEarliest.end, we need one more room;
 2. if currentMeeting.start >= ongoingMeetingThatEndsEarliest.end, we could use that room, remove the that meeting from ongoing list, and add current meeting into it.
@@ -71,10 +75,11 @@ function minMeetingRooms(intervals) {
 }
 ```
 
-
 ### [Insert Interval](https://leetcode.com/problems/insert-interval/)
 
-目标区域的范围为 start 至 end，因为 intervals 已经有序，可以想象拖动要与其匹配的区间为滑块在下面自左向右滑动。最多需要考虑与其匹配的滑块大小大于/小于目标区域这两种情况。很自然地有：
+insert a new interval into the intervals (merge if necessary).
+
+目标区域的范围为 start 至 end，因为 intervals 已经有序，可以想象拖动要与其匹配的区间为滑块在下面自左向右滑动。最多需要考虑与其匹配的滑块大小大于/小于目标区域这两种情况。故：
 
 1. 当 interval.end < start 时，没有交集；
 2. 当 interval.start > end 时，没有交集；
@@ -103,13 +108,13 @@ var insert = function (intervals, newInterval) {
 
 ### [Interval List Intersections](https://leetcode.com/problems/interval-list-intersections/)
 
-从上一题学到的 a & b 有交集 => a.end >= b.start && a.start <= b.end。
+given two lists of closed intervals, each list of intervals is pairwise _disjoint_ and in _sorted_ order, return the intersection of these two interval lists.
 
-两个 index，一个标记 a 当前遍历到的位置，另一个标记 b。
+a & b 有交集 => a.end >= b.start && a.start <= b.end。
 
-若当前 index 对应的两个时间段有交集，则取交集部分加入 res。
+设置两个 index，一个标记 a 当前遍历到的位置，另一个标记 b。若当前 index 对应的两个时间段有交集，则取交集部分加入 res。
 
-何时移动 index？不论当前对比的两个时间段是否有交集，这一轮遍历都应排除 end 更早的时间段。
+何时移动 index？不论当前对比的两个时间段是否有交集，本轮遍历都应排除 end 更早的时间段。
 
 ```js
 var intervalIntersection = function (first, sec) {
@@ -132,7 +137,7 @@ var intervalIntersection = function (first, sec) {
 
 ### [Meeting Scheduler](https://poby.medium.com/leetcode-1229-meeting-scheduler-b9bed7c40a75)
 
-slots1 and slots2 of two people; return the earliest time slot that works for both of them and is of duration.
+given slots1 and slots2 of two people, return the earliest time slot that works for both of them and is of duration.
 
 暴力解法：对比所有区间，第一个符合条件即返回。
 
@@ -154,7 +159,7 @@ function minAvailableDuration(slots1, slots2, duration) {
 }
 ```
 
-延用上一题思路
+延用上一题思路：
 
 ```js
 function minAvailableDuration(slots1, slots2, duration) {
@@ -193,7 +198,9 @@ var findPoisonedDuration = function (timeSeries, duration) {
 
 ### [Missing Ranges](https://github.com/grandyang/leetcode/issues/163)
 
-对比当前 num 和 lower，如果 num > lower 则说明有跳过的区间，需要加入 res；如果 num = upper，则不需要再继续判断；更新下次迭代期望的 lower 值。对比最后的 lower 和 upper，处理可能存在的剩余区间。
+given a sorted integer array, return its missing ranges by string in a particular format.
+
+对比当前 num 和 lower，如果 num > lower 则说明有跳过的区间，需要加入 res；如果 num = upper，说明需要检查的区间已经全部检查完毕了，不需要再继续判断；更新下次迭代期望的 lower 值。对比最后的 lower 和 upper，处理可能存在的剩余区间。
 
 ```js
 var missingRanges = function (nums, lower, upper) {
@@ -207,7 +214,8 @@ var missingRanges = function (nums, lower, upper) {
     }
     lower = num + 1;
   }
-  if (lower <= upper) res.push(lower === upper ? lower.toString() : `${lower}->${upper}`);
+  if (lower <= upper)
+    res.push(lower === upper ? lower.toString() : `${lower}->${upper}`);
   return res;
 };
 ```
@@ -215,6 +223,8 @@ var missingRanges = function (nums, lower, upper) {
 ## Math
 
 ### [Majority Element](https://leetcode.com/problems/majority-element/)
+
+Given an array nums of size n, return the majority element.
 
 ```js
 var majorityElement = function (nums) {
@@ -237,7 +247,7 @@ var majorityElement = function (nums) {
 
 ### [Majority Element II](https://leetcode.com/problems/majority-element-ii/)
 
-all elements appear more than ⌊ n/3 ⌋ times. => can only have two candidates.
+all elements appear more than ⌊ n/3 ⌋ times. => can at most have two candidates.
 
 ```js
 var majorityElement = function (nums) {
@@ -247,7 +257,7 @@ var majorityElement = function (nums) {
   let count1 = 0,
     count2 = 0,
     m1 = 0,
-    m2 = 0;
+    m2 = 1;
   for (let num of nums) {
     if (num === m1) count1++;
     else if (num === m2) count2++;
@@ -270,7 +280,11 @@ var majorityElement = function (nums) {
 };
 ```
 
+Note: the value of m1 & m2 given at initialization doesn't matter, but they should be different from each other.
+
 ### [Find Pivot Index](https://leetcode.com/problems/find-pivot-index/)
+
+Given an array of integers nums, calculate the leftmost pivot index of this array. The pivot index: separate the array to two half that sums equally.
 
 ```js
 var pivotIndex = function (nums) {
@@ -288,9 +302,9 @@ var pivotIndex = function (nums) {
 
 ### [Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/)
 
-solve it without division and in O(n).
+Given an integer array, return the answer such that answer[i] is equal to the product of all the elements of nums except nums[i]. solve it without division and in O(n).
 
-从左到右：res[i] = product of nums[0]...nums[i-1]；再从右到左: res[i] *= product of nums[i+1]...nums[end]。
+从左到右：res[i] = product of nums[0]...nums[i-1]；再从右到左: res[i] \*= product of nums[i+1]...nums[end]。
 
 ```js
 var productExceptSelf = function (nums) {
@@ -501,30 +515,28 @@ var minSubarray = function (nums, p) {
 
 Note: [why (curr - mod + p) % p instead of (curr - mod) % p directly?](https://leetcode.com/problems/make-sum-divisible-by-p/discuss/854895/How-to-approach-this-kind-of-problem-mind-map) => Why in java solutions we have to do a lookup for (cur - target + p)%p but for python solutions we do lookup only for (cur - target)%p
 
-
 #### [Remove Zero Sum Consecutive Nodes from Linked List](https://leetcode.com/problems/remove-zero-sum-consecutive-nodes-from-linked-list/)
 
 list = [1, 2, -3, 3, 1]
 pref = [1, 3, 0, 3, 4]
-idx  = [0, 1, 2, 3, 4]
+idx = [0, 1, 2, 3, 4]
 
 => [3,1]
 
 ```js
 var removeZeroSumSublists = function (head) {
-  let prefix = 0,
-    map = {},
+  let sum = 0,
+    map = new Map(),
     dummy = new ListNode(0);
   dummy.next = head;
-  map[0] = dummy;
   for (let i = dummy; i !== null; i = i.next) {
-    prefix += i.val;
-    map[prefix] = i;
+    sum += i.val;
+    map.set(sum, i);
   }
-  prefix = 0;
+  sum = 0;
   for (let i = dummy; i !== null; i = i.next) {
-    prefix += i.val;
-    i.next = map[prefix].next;
+    sum += i.val;
+    i.next = map.get(sum).next;
   }
   return dummy.next;
 };
@@ -533,6 +545,8 @@ var removeZeroSumSublists = function (head) {
 ## Flip Array Elements
 
 ### [Find All Numbers Disappeared in an Array](https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array/)
+
+Given an array nums of n integers where nums[i] is in the range [1, n], return an array of all the integers in the range [1, n] that do not appear in nums.
 
 将 nums[i] 作为 idx 去访问数组元素。由于 1 <= nums[i] <= n，所以作为 idx 时要减 1。将访问到的数置为负，没有被访问到的说明其 idx + 1 不存在于数组中。
 
@@ -830,16 +844,33 @@ class Vector2D {
 
 ### [Reveal Cards In Increasing Order](https://leetcode.com/problems/reveal-cards-in-increasing-order/)
 
-given a list of numbers in unsorted order, return a sequence that could reorder it by steps the questions mentioned to asc.
+given a list of numbers in unsorted order, return a sequence that could reorder it by below steps: 1. Take the top card out of the deck, gather it; 2. If there are still cards in the deck, put the next top card to the bottom. 3. repeat 1 & 2 until cards are all gathered.
+
+so, given the sorted target list, we could generate the required sequence by reversing above steps: 1. If there are still cards in the res, put the bottom card to the top. 2. set last element of target as the new top of the res sequence.
 
 ```js
 var deckRevealedIncreasing = function (deck) {
-  let n = deck.length,
+  let target = deck.concat(),
     res = [];
-  deck.sort((a, b) => a - b);
-  for (let i = n - 1; i >= 0; i--) {
+  target.sort((a, b) => a - b);
+  while (target.length) {
     if (res.length > 0) res.unshift(res.pop());
-    res.unshift(deck[i]);
+    res.unshift(target.pop());
+  }
+  return res;
+};
+```
+
+### [Queue Reconstruction by Height](https://leetcode.com/problems/queue-reconstruction-by-height/)
+
+sort people first by height desc, then by k asc, and insert into res by k value one by one.
+
+```js
+var reconstructQueue = function (people) {
+  people.sort(([h1, k1], [h2, k2]) => (h1 != h2 ? h2 - h1 : k1 - k2));
+  let res = [];
+  for (let p of people) {
+    res.splice(p[1], 0, p);
   }
   return res;
 };
@@ -848,6 +879,10 @@ var deckRevealedIncreasing = function (deck) {
 ## Others
 
 ### [Rotate Array](https://leetcode.com/problems/rotate-array/)
+
+Given an array, rotate the array to the right by k steps.
+
+when we rotate the array k times, k elements from the back end of the array come to the front and the rest of the elements from the front shift backwards. so we firstly reverse all the elements of the array. Then, reversing the first k elements followed by reversing the rest n-k elements gives us the required result.
 
 ```js
 var rotate = function (nums, k) {
@@ -866,22 +901,9 @@ function reverse(nums, start, end) {
 }
 ```
 
-### [Queue Reconstruction by Height](https://leetcode.com/problems/queue-reconstruction-by-height/)
-
-sort people first by height, then by count, and insert into res by k value one by one.
-
-```js
-var reconstructQueue = function (people) {
-  people.sort(([h1, k1], [h2, k2]) => (h1 != h2 ? h2 - h1 : k1 - k2));
-  let res = [];
-  for (let p of people) {
-    res.splice(p[1], 0, p);
-  }
-  return res;
-};
-```
-
 ### [Wiggle Sort](https://github.com/grandyang/leetcode/issues/280)
+
+Given an unsorted array nums, reorder it in-place such that nums[0] <= nums[1] >= nums[2] <= nums[3]...
 
 解法一：O(nlogn) 先排序，排序后一定有 a < b < c < d < e，此时只需每两个一组交换位置就能满足要求，即 a < c > b < e > d etc.
 
@@ -915,7 +937,9 @@ function wiggleSort(nums) {
 
 ### [Wiggle Sort II](https://leetcode.com/problems/wiggle-sort-ii/)
 
-严格大于或小于。Wiggle Sort solution won't work for [5,5,5,4,4,4,4].
+Given an integer array nums, reorder it such that nums[0] < nums[1] > nums[2] < nums[3]...
+
+Wiggle Sort solution won't work for [5,5,5,4,4,4,4].
 
 O(nlogn) + O(n) sort and split to two groups: A & B, all elements in A is smaller than elements in B, then place them into the right place.
 
