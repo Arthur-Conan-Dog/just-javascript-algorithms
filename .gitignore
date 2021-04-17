@@ -1,2 +1,3 @@
-*-test.js
+.vscode
+*test.js
 *-test-cases.js
