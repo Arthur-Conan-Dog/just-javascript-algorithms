@@ -123,6 +123,8 @@ function rightBound(arr, target) {
 
 ### [Valid Perfect Square](https://leetcode.com/problems/valid-perfect-square/)
 
+Given a positive integer num, write a function which returns true if num is a perfect square else false.
+
 ```js
 var isPerfectSquare = function (num) {
   let l = 1,
@@ -162,6 +164,8 @@ var isPerfectSquare = function (num) {
 ```
 
 ### [Sqrt(x)](https://leetcode.com/problems/sqrtx/)
+
+Given a non-negative integer x, compute and return the square root of x, truncate decimal part, only return the integer part.
 
 ```js
 var mySqrt = function (x) {
@@ -227,17 +231,9 @@ var solution = function (isBadVersion) {
 
 ### [Missing Element in Sorted Array](https://leetcode.com/problems/missing-element-in-sorted-array/)
 
-Given a list of n-1 integers and these integers are in the range of 1 to n. There are no duplicates in list. One of the integers is missing in the list. Write an efficient code to find the missing integer.
+Given a sorted list of n-1 integers and these integers are in the range of 1 to n. There are no duplicates in list. One of the integers is missing in the list. Find the missing integer.
 
-eg:
-
-Input : arr[] = [1, 2, 3, 4, 6, 7, 8]
-Output : 5
-
-Input : arr[] = [1, 2, 3, 4, 5, 6, 8, 9]
-Output : 7
-
-思路：找到满足 arr[index] - 1 !== index 子序列的最左侧边界。
+找到满足 arr[index] !== index + 1 子序列的最左侧边界。
 
 ```js
 function findMissingElement(arr) {
@@ -258,6 +254,8 @@ function findMissingElement(arr) {
 
 ### [Peak Index in a Mountain Array](https://leetcode.com/problems/peak-index-in-a-mountain-array/)
 
+guaranteed exists.
+
 找到满足 arr[mid] > arr[mid + 1] 区间的最左侧。
 
 ```js
@@ -276,9 +274,13 @@ var peakIndexInMountainArray = function (arr) {
 };
 ```
 
+Note: 最右侧也可以，题目没要求。
+
 ### [Find Peak Element](https://leetcode.com/problems/find-peak-element/)
 
-找到满足 arr[mid] > arr[mid+1] 区间的最左侧。
+同上题。
+
+找到满足 arr[mid] > arr[mid + 1] 区间的最左侧。
 
 ```js
 var findPeakElement = function (arr) {
@@ -287,11 +289,11 @@ var findPeakElement = function (arr) {
   while (l < r) {
     let mid = Math.floor((r + l) / 2),
       next = mid + 1 < arr.length ? arr[mid + 1] : -Infinity;
-    if (arr[mid] > next) {
+    if (arr[mid] < next) {
+      l = mid + 1; // [l, mid] is going up
+    } else {
       // [mid, r) is going down
       r = mid;
-    } else {
-      l = mid + 1; // [l, mid] is going up
     }
   }
   return l;
@@ -543,7 +545,7 @@ var search = function (nums, target) {
     r = nums.length - 1;
   while (l <= r) {
     let m = Math.floor((l + r) / 2);
-    // 补丁二：由于 r 的初始值改成了 nums.length - 1，while 条件对应改成了 l <= r，则存在 l === r 且 target === nums[l] 的情况，补丁一的 if 条件可能成立，导致边界越过 target，所以需要预先判断并返回
+    // 补丁二：由于 r 的初始值改成了 nums.length - 1，while 条件对应改成了 l <= r，则存在 l === r 且 target === nums[l] 的情况，补丁一的 if 条件可能成立，导致边界越过 target，所以需要预先判断并返回。
     if (nums[m] === target) return m;
     // 补丁一：选择一端（右端）消除重复。由于要取 nums[r] 的值，所以 r 的初始值改成了 nums.length - 1 以防越界。
     if (nums[m] === nums[r]) {
@@ -588,7 +590,7 @@ var searchMatrix = function (matrix, target) {
 };
 ```
 
-注：延伸题 [Search a 2D Matrix II](https://leetcode.com/problems/search-a-2d-matrix-ii/)
+延伸题：[Search a 2D Matrix II](https://leetcode.com/problems/search-a-2d-matrix-ii/)
 
 row, left to right increasing; col, top to bottom, increasing.
 
@@ -611,7 +613,7 @@ var searchMatrix = function (matrix, target) {
 
 ### [Kth Smallest Element in a Sorted Matrix](https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/)
 
-each of the rows and columns are sorted in ascending order
+n x n, each of the rows and columns are sorted in ascending order
 
 O(N^2) => O(N\*logN)
 
@@ -643,8 +645,6 @@ var kthSmallest = function (matrix, k) {
 };
 ```
 
-注：n x n。
-
 ### [Single Element in a Sorted Array](https://leetcode.com/problems/single-element-in-a-sorted-array/)
 
 every element appears exactly twice except for one.
@@ -669,7 +669,7 @@ var singleNonDuplicate = function (nums) {
 
 ### [Sum of Mutated Array Closest to Target](https://leetcode.com/problems/sum-of-mutated-array-closest-to-target/)
 
-bestValue 取值范围: [0, maxOfTheArray]。原因：即使 bestValue > maxOfTheArray，按照题意 sum 整个数组得到的值也跟 bestValue = maxOfTheArray 时相等。注意到这个区间是一个有序的递增区间，那么就可以使用二分搜索，找到满足条件 calc(arr) === target 的最小值左边界。
+bestValue 取值范围: [0, maxInTheArray]。原因：即使 bestValue > maxInTheArray，按照题意 sum 整个数组得到的值也跟 bestValue = maxInTheArray 时相等。注意到这个区间是一个有序的递增区间，那么就可以使用二分搜索，找到满足条件 calc(arr) === target 的最小值左边界。
 
 calc 的逻辑按题意：大于当前选取值的，取选取值；小于当前选取值的，取该值，最终得到 special sum。
 
@@ -728,7 +728,7 @@ var threeSum = function (nums) {
 };
 ```
 
-binary search TODO: complexity analysis
+binary search
 
 ```js
 var threeSum = function (nums) {
