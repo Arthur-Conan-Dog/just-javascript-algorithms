@@ -662,6 +662,8 @@ TODO: [nlogn 解法 binarySearch + patience sorting](https://github.com/CyC2018/
 
 #### [Largest Divisible Subset](https://leetcode.com/problems/largest-divisible-subset/)
 
+Given a set of _distinct_ positive integers nums, return the largest subset answer such that every pair (answer[i], answer[j]) of elements in this subset satisfies: answer[i] % answer[j] == 0, or answer[j] % answer[i] == 0. Any valid solution is okay.
+
 LIS 变体。求满足条件的最长子序列本身。
 
 dp[i] 表示以 nums[i] 为结尾的子序列所对应的满足条件的最大值。条件从递增变为满足 nums[i] % nums[j] === 0。
@@ -707,7 +709,7 @@ LIS 变体。求满足条件的最长子序列数量。
 
 需要额外的 counts 数组来记录以 nums[i] 为结尾的最长子序列的数量。
 
-当 nums[i] > nums[j] 时，需要考虑两种情况：1) lengths[j] + 1 == lengths[i] => 则 counts[i] 需要加上 counts[j]; 2) lengths[j] + 1 < lengths[i] => 说明能够构造出更长的子序列，counts[i] = counts[j]。
+当 nums[i] > nums[j] 时，需要考虑两种情况：1) lengths[j] + 1 == lengths[i] => 则 counts[i] 需要加上 counts[j]; 2) lengths[j] + 1 > lengths[i] => 说明能够构造出更长的子序列，counts[i] = counts[j]。
 
 如果 lengths[i] 超过了当前记录的最大值，需要重置 max & res。如果等于 max，需要把当前的数量累加到 res 中。
 
@@ -741,6 +743,8 @@ var findNumberOfLIS = function (nums) {
 ```
 
 #### [Maximum Length of Pair Chain](https://leetcode.com/problems/maximum-length-of-pair-chain/)
+
+Given a set of pairs, find the length longest chain which can be formed. In every pair, the first number is always smaller than the second number.
 
 LIS 变体。满足条件改变。
 
@@ -786,7 +790,9 @@ var findLongestChain = function (pairs) {
 
 #### [Russian Doll Envelopes](https://leetcode.com/problems/russian-doll-envelopes/)
 
-LIS 变体。满足条件改变。注意题目要求不能旋转信封，互换宽高。
+Return the maximum number of envelopes you can Russian doll (i.e., put one inside the other). Note: You cannot rotate an envelope.
+
+LIS 变体。满足条件改变。
 
 ```js
 var maxEnvelopes = function (envelopes) {
@@ -812,6 +818,8 @@ var maxEnvelopes = function (envelopes) {
 ```
 
 #### [Longest String Chain](https://leetcode.com/problems/longest-string-chain/)
+
+Return the longest possible length of a word chain. word1 is a predecessor of word2 if and only if we can add exactly one letter anywhere in word1 to make it equal to word2.
 
 LIS 变体。满足条件改变。
 
@@ -851,6 +859,8 @@ function canAddOne(a, b) {
 
 #### [Delete and Earn](https://leetcode.com/problems/delete-and-earn/)
 
+Start with 0 points. Return the maximum number of points you can earn by applying such operations.
+
 dp[i] 表示使用 nums[0...i] 能得到的最高分值。则对于 dp[i]，可以考虑使用或者不使用 nums[j] != nums[i] - 1 的那些数字，不使用则保留 dp[i]，使用则有 dp[j] + nums[i]，在两者中取较大值。需要先排序来保证只对比 nums[j] 能覆盖 j 之前的子问题，并且不需要再考虑 nums[i] + 1 的情况。
 
 ```js
@@ -875,7 +885,7 @@ var deleteAndEarn = function (nums) {
 };
 ```
 
-更简单的 DP 思路：dp[i] 表示使用数字 0 - i 得到的最高分数，则有：1) 不使用数字 i，使用 0 - i-1；2) 使用数字 i，则能得到的值为 dp[i-2] + i _ i 出现的次数。状态转移方程：``dp[i] = Math.max(dp[i-1], dp[i-2] + counts[i] _ i)``。
+另一种思路：利用 constraints 约束的数字范围。dp[i] 表示使用数字 0 - i 得到的最高分数，则选择有：1) 不使用数字 i，使用 [0...i-1]；2) 使用数字 i，则能得到的值为 `dp[i-2] + counts[i] * i` 出现的次数。状态转移方程：`dp[i] = Math.max(dp[i-1], dp[i-2] + counts[i] * i)`。
 
 ```js
 var deleteAndEarn = function (nums) {
@@ -894,16 +904,18 @@ var deleteAndEarn = function (nums) {
 
 #### [Arithmetic Slices](https://leetcode.com/problems/arithmetic-slices/)
 
-dp[i] 表示以 nums[i] 为结尾的满足条件的 **子数组** 数。
+Given an integer array nums, return the number of arithmetic subarrays(a contiguous subsequence) of nums.
 
-以 [1,2,3,4] 为例。dp[2] = 1， 代表序列 [1,2,3]；dp[3] = dp[2] + 1 => [1,2,3][4] + [2,3,4]。故 sum 需要累加 dp[i]。
+dp[i] 表示以 nums[i] 为结尾的满足条件的 **子数组** 数。由于连续，即 dp[i] 仅与 dp[i-1] 相关，可以省略至只用一个变量 dp 来维护。
+
+以 [1,2,3,4] 为例。dp[2] = 1，代表序列 [1,2,3]；dp[3] = dp[2] + 1 => [1,2,3][4] + [2,3,4]。故 sum 需要累加 dp[i]。
 
 ```js
 var numberOfArithmeticSlices = function (A) {
   var dp = 0,
     sum = 0;
   for (let i = 2; i < A.length; i++) {
-    if (A[i] - A[i - 1] == A[i - 1] - A[i - 2]) {
+    if (A[i] - A[i - 1] === A[i - 1] - A[i - 2]) {
       dp = dp + 1;
       sum += dp;
     } else dp = 0;
@@ -914,13 +926,13 @@ var numberOfArithmeticSlices = function (A) {
 
 #### [Arithmetic Slices II - Subsequence](https://leetcode.com/problems/arithmetic-slices-ii-subsequence/)
 
-[dp + hashmap](<https://leetcode.com/problems/arithmetic-slices-ii-subsequence/discuss/92822/Detailed-explanation-for-Java-O(n2)-solution>)
+Given an integer array nums, return the number of all the arithmetic subsequences of nums.
 
-dp[i][diff] 表示以 nums[i] 为结尾的，各元素间差值为 diff 的序列数。很自然地，长度 >= 2 才能构成序列。以 [2, 4, 6, 1, 8] 为例：
+`dp[i][diff]` 表示以 nums[i] 为结尾的，各元素间差值为 diff 的序列数。很自然地，长度 >= 2 才能构成序列。以 [2, 4, 6, 1, 8] 为例：
 
-i = 2, j = 1 时，diff = nums[i] - nums[j] = 2。对于 dp[i][diff] 产生了一个新序列：[nums[j], nums[i]]，即 [4,6]。此外，还可能由 dp[j][diff] 附加上当前元素 nums[i] 产生更多子序列：即 dp[j] = {2:1} => 序列 [2,4] => [2,4,6]。得到最终 dp[i] = {2:2} => [4,6] & [2,4,6]。
+i = 2, j = 1 时，diff = nums[i] - nums[j] = 2。对于 `dp[i][diff]` 产生了一个新序列：`[nums[j], nums[i]]`，即 [4,6]。此外，还可能由 `dp[j][diff]` 附加上当前元素 nums[i] 产生更多子序列：即 dp[j] = {2:1} => 序列 [2,4] => [2,4,6]。得到最终 dp[i] = {2:2} => [4,6] & [2,4,6]。
 
-由于 diff = nums[i] - nums[j] 的存在，dp[j][diff] 所代表的所有序列均成为了合法序列，可以加入 res 中。
+由于 diff = nums[i] - nums[j] 的存在，`dp[j][diff]` 所代表的所有序列均成为了合法序列，可以加入 res 中。
 
 ```js
 var numberOfArithmeticSlices = function (A) {
@@ -934,13 +946,15 @@ var numberOfArithmeticSlices = function (A) {
       let ci = dp[i].get(diff) || 0;
       let cj = dp[j].get(diff) || 0;
       res += cj;
-      dp[i].set(diff, ci + cj + 1); // 1 means sequence [A[j], A[i]]
+      dp[i].set(diff, ci + cj + 1); // 1 for sequence [A[j], A[i]]
     }
   }
 
   return res;
 };
 ```
+
+[dp + hashmap](<https://leetcode.com/problems/arithmetic-slices-ii-subsequence/discuss/92822/Detailed-explanation-for-Java-O(n2)-solution>)
 
 #### [Increasing Triplet Subsequence](https://leetcode.com/problems/increasing-triplet-subsequence/)
 
@@ -980,31 +994,31 @@ var increasingTriplet = function (nums) {
 
 求 LCS 的长度 / 本身 / 个数。使两字符串变得一致的操作数。
 
-Subsequence：字符相等和不相等两种情况均可以扩展 dp[i-1][j-1] & dp[i-1][j], dp[i][j-1] => dp[i][j]。
+Subsequence：字符相等和不相等两种情况均可以扩展 `dp[i-1][j-1]`; `dp[i-1][j]`, `dp[i][j-1]` => `dp[i][j]`。
 
-Substring: 只有字符相等时才可以扩展 dp[i-1][j-1] => dp[i][j]。
+Substring: 只有字符相等时才可以扩展 `dp[i-1][j-1]` => `dp[i][j]`。
 
 #### [Longest Common Subsequence](https://leetcode.com/problems/longest-common-subsequence/)
 
-dp[i][j] 表示 S1 的前 i 个字符与 S2 的前 j 个字符间最长公共子序列的长度。
+`dp[i][j]` 表示 S1 的前 i 个字符与 S2 的前 j 个字符间最长公共子序列的长度。
 
-base case: dp[0][j] or dp[i][0] => 0。
+base case: `dp[0][j]` or `dp[i][0]` => 0。
 
 状态：
 
-- 若 S1[i] === S2[j]，表示可以纳入公共子序列进行计算，则 dp[i][j] = dp[i-1][j-1] + 1；
+- 若 `S1[i] === S2[j]`，表示可以纳入公共子序列进行计算，则 `dp[i][j] = dp[i-1][j-1] + 1`；
 
-- 若 S1[i] !== S2[j]，则从 dp[i-1][j] & dp[i][j-1] 取较大值。
+- 若 `S1[i] !== S2[j]`，则从 `dp[i-1][j]` & `dp[i][j-1]` 取较大值。
 
-为什么不直接在 dp[i-1][j]，dp[i][j-1]，dp[i-1][j-1] + 1 间取最大值？=> 因为 S1[i] 与 S2[j] 要么相等要么不想等，不可能既相等又不相等，dp[i-1][j-1] + 1 就表示 S1[i] 与 S2[j] 相等。这与背包问题可以选择拿或者不拿是不同的。
+  - 为什么不直接在 `dp[i-1][j]`，`dp[i][j-1]`，`dp[i-1][j-1]` + 1 间取最大值？=> 因为 S1[i] 与 S2[j] 要么相等要么不想等，不可能既相等又不相等，`dp[i-1][j-1]` + 1 就表示 S1[i] 与 S2[j] 相等。这与背包问题在每一步即可以选择拿也可以选择不拿是不同的。
 
-为什么 S1[i] !== S2[j] 时，不在 dp[i-1][j]，dp[i][j-1]，dp[i-1][j-1] 里取最大值？=> 根据 dp 定义，dp[i-1][j-1] 只可能 <= dp[i-1][j]，后者比前者可能多纳入 lsc 一个字符，故 max 不可能取自 dp[i-1][j-1]。
+  - 为什么 S1[i] !== S2[j] 时，不在 `dp[i-1][j]`，`dp[i][j-1]`，`dp[i-1][j-1]` 里取最大值？=> 根据 dp 定义，`dp[i-1][j-1]` 只可能 <= `dp[i-1][j]`，后者比前者可能多纳入 lsc 一个字符，故 max 不可能取自 `dp[i-1][j-1]`。
 
 与最长递增子序列相比，最长公共子序列有以下不同点：
 
-- 最长递增子序列只针对单个序列；最长公共子序列针对的是多个序列。
+- 最长递增子序列只针对单个序列；最长公共子序列针对的是两个序列。
 
-- 在最长递增子序列中，dp[i] 表示以 S[i] 为结尾的最长递增子序列长度，子序列必须包含 S[i]；在最长公共子序列中，dp[i][j] 表示 S1 中前 i 个字符与 S2 中前 j 个字符的最长公共子序列长度，不一定包含 S1[i] 和 S2[j]。（因为当前的最大值可能来自于 dp[i-1][j] 或 dp[i][j-1]）
+- 在最长递增子序列中，dp[i] 表示以 S[i] 为结尾的最长递增子序列长度，子序列必须包含 S[i]；在最长公共子序列中，`dp[i][j]` 表示 S1 中前 i 个字符与 S2 中前 j 个字符的最长公共子序列长度，不一定包含 S1[i] 和 S2[j]。（因为当前的最大值可能来自于 `dp[i-1][j]` 或 `dp[i][j-1]`）
 
 - 最长递增子序列中 dp[n] 不是最终解，因为以 Sn 为结尾的最长递增子序列不一定是整个序列最长递增子序列，需要遍历一遍 dp 数组找到最大者；而对于最长公共子序列，dp[n][m] 就是最终解。
 
@@ -1080,7 +1094,7 @@ var shortestCommonSupersequence = function (s1, s2) {
     j++;
   }
 
-  return res + s1.substr(i) + s2.substr(j);
+  return res + s1.slice(i) + s2.slice(j);
 };
 
 var longestCommonSequence = function (s1, s2) {
@@ -1105,7 +1119,7 @@ var longestCommonSequence = function (s1, s2) {
 
 #### [Longest Common Substring](https://www.geeksforgeeks.org/longest-common-substring-dp-29/)
 
-由于是 substring，，为保证 i - 1 => i 的连续，只有当 s[i] === t[j] 时，才应该更新 dp[i][j] 的值，而最大值需要在迭代过程中不断更新。
+由于是 substring，为保证 i - 1 => i 的连续，只有当 s[i] === t[j] 时，才应该更新 dp[i][j] 的值，而最大值需要在迭代过程中不断更新。
 
 ```js
 var longestCommonSubstring = function (s, t) {
@@ -1171,7 +1185,7 @@ function longestRepeatingSubsequence(s) {
 
 the number of distinct subsequences of s which equals t, s => t.
 
-dp[i][j] 表示 t[0...i] 与 s[0...j] 间合法的子序列数。注意矩阵形式有所不同。
+dp[i][j] 表示 s[0...i] 与 t[0...j] 间合法的子序列数。
 
 base case
 
@@ -1181,26 +1195,24 @@ base case
 
 general case:
 
-- s[j] !== t[i]，则 s[j] 对构成 subsequence 没有帮助，只能选择不使用 s[j]，向子问题靠拢：dp[i][j] = dp[i][j-1]；
+- s[i] !== t[j]，则 s[i] 对构成 subsequence 没有帮助，只能选择不使用 s[i]，向子问题靠拢：dp[i][j] = dp[i-1][j]；
 
-- s[j] === t[i]，则有两种选择：1) 使用 s[j]，取 dp[i-1][j-1]，因为要保证 s[j] & t[i] 未被考虑过以免重复；2) 不使用 s[j]，取 dp[i][j-1]。序列数为两种情况的和。
+- s[i] === t[j]，则有两种选择：1) 使用 s[i]，取 dp[i-1][j-1]，因为要保证 s[i] & t[j] 未被考虑过以免重复；2) 不使用 s[i]，取 dp[i-1][j]。序列数为两种情况的和。
 
-为什么 s[j] === t[i] ，不使用 s[j] 时不需要 dp[i-1][j]？因为我们是以 t 为目标去比对。
+为什么 s[i] === t[j]，不使用 s[i] 时不需要 dp[i-1][j]？因为是以 t 为目标去比对。
 
 ```js
 var numDistinct = function (s, t) {
-  let m = t.length,
-    n = s.length,
+  let m = s.length,
+    n = t.length,
     dp = [...Array(m + 1)].map(() => Array(n + 1).fill(0));
-  for (let j = 0; j <= n; j++) {
-    dp[0][j] = 1;
-  }
+  for (let i = 0; i <= m; i++) dp[i][0] = 1;
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
-      if (t[i - 1] === s[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1] + dp[i][j - 1];
+      if (s[i - 1] === t[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j];
       } else {
-        dp[i][j] = dp[i][j - 1];
+        dp[i][j] = dp[i - 1][j];
       }
     }
   }
@@ -1209,6 +1221,8 @@ var numDistinct = function (s, t) {
 ```
 
 #### [Edit Distance](https://leetcode.com/problems/edit-distance/)
+
+Given two strings word1 and word2, return the minimum number of operations required to convert word1 to word2. Can have 3 operations permitted on a word: insert, delete, replace a character.
 
 base case: 另一方为空串，dp[i][0] / dp[0][i] 表示与空串之间的操作数，等于当前字符串长度。
 
@@ -1441,7 +1455,7 @@ var isInterleave = function (s1, s2, s3) {
 };
 ```
 
-DP(optimize space)
+DP(optimize space): 只与 i - 1 和 j - 1 有关。
 
 ```js
 var isInterleave = function (s1, s2, s3) {
@@ -1471,6 +1485,8 @@ var isInterleave = function (s1, s2, s3) {
 ### Palindrome String
 
 #### [Longest Palindromic Substring](https://leetcode.com/problems/longest-palindromic-substring/)
+
+Given a string s, return the longest palindromic substring in s.
 
 dp[i][j] 表示 s(i, j) 是回文串，s(i, j) 为回文串的条件：
 
@@ -1531,7 +1547,7 @@ var longestPalindrome = function (s) {
 
 #### [Palindromic Substrings](https://leetcode.com/problems/palindromic-substrings/)
 
-TODO: complexity analysis
+求回文子串数量。
 
 DP 解法
 
@@ -1575,6 +1591,8 @@ var countSubstrings = function (s) {
 ```
 
 #### [Palindrome Partitioning II](https://leetcode.com/problems/palindrome-partitioning-ii/)
+
+Given a string s, partition s such that every substring of the partition is a palindrome. Return the minimum cuts needed.
 
 cuts[i] 表示从第一个字符开始，长度为 i 的子串所需要的最小分割数。
 
@@ -1625,6 +1643,8 @@ var minCut = function (s) {
 
 #### [Climbing Stairs](https://leetcode.com/problems/climbing-stairs/)
 
+Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?
+
 ```js
 var climbStairs = function (n) {
   let dp = [0, 1, 2];
@@ -1636,6 +1656,8 @@ var climbStairs = function (n) {
 ```
 
 #### [House Robber](https://leetcode.com/problems/house-robber/)
+
+Return the maximum amount of money you can rob. Cannot break into two adjacent houses on the same night.
 
 ```js
 var rob = function (nums) {
@@ -1654,7 +1676,7 @@ var rob = function (nums) {
 };
 ```
 
-压缩空间
+optimize space: 只与 i - 1 和 i - 2 有关。
 
 ```js
 var rob = function (nums) {
@@ -1670,6 +1692,8 @@ var rob = function (nums) {
 ```
 
 #### [House Robber II](https://leetcode.com/problems/house-robber-ii/)
+
+All houses at this place are arranged in a circle.
 
 say we have house 1 - 9, divide to two sub-problems: rob 1-8 & rob 2-9, since 1 & 9 are adjacent.
 
@@ -1693,6 +1717,8 @@ var rob = function (nums) {
 
 #### [House Robber III](https://leetcode.com/problems/house-robber-iii/)
 
+Given the root of the binary tree.
+
 ```js
 var rob = function (root) {
   function robIn(node) {
@@ -1714,6 +1740,8 @@ var rob = function (root) {
 ### Sell Stock
 
 #### [Best Time to Buy and Sell Stock](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/)
+
+Choosing a single day to buy one stock and choosing a different day in the future to sell that stock. Return the maximum profit.
 
 思路一：对于每个时间点，找到其后比它大的每一天并计算差值，比较得到最大。O(N^2)
 
@@ -1743,6 +1771,8 @@ Adding all these, all the middle terms will cancel out except two: b3 + b4 + b5 
 
 #### [Best Time to Buy and Sell Stock II](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/)
 
+Find the maximum profit. Transaction times is not limited.
+
 add all non-zero values in diff sub-array.
 
 ```js
@@ -1757,29 +1787,23 @@ var maxProfit = function (prices) {
 
 #### [Best Time to Buy and Sell Stock with Cooldown](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/)
 
-联系 Wiggle Subsequence 使用了 up & down 两个 dp 数组 => buy & sell
+You may complete as many transactions as you like (i.e., buy one and sell one share of the stock multiple times) with the following restrictions: cannot buy stock on the next day (i.e., cooldown one day).
 
-state machine:
+state machine: buy => sell => cool down => buy
 
-buy => sell => cool down => buy
+DP:
 
-buy => rest => buy
+- `buy[i] = max{ buy[i-1], sell[i-2] - prices[i] }`
 
-sell => rest => sell
+  - 选择不交易：沿用 buy[i-1]
 
-convert to dp:
+  - 在这一天买入：sell[i-2] - prices[i] (sell[i-2] for one day cooldown)
 
-- buy[i] = max{ buy[i-1], sell[i-2] - prices[i] }
+- `sell[i] = max{ sell[i-1], buy[i-1] + prices[i] }`
 
-  - buy[i-1]: choose not to operate, rest 1 day
+  - 选择不交易：沿用 sell[i-1]
 
-  - sell[i-2] - prices[i]: cool down 1 day
-
-- sell[i] = max{ sell[i-1], buy[i-1] + prices[i] }
-
-  - sell[i-1]: choose not to operate, rest 1 day
-
-  - buy[i-1] + prices[i]: sell based on last day's buy in
+  - 在这一天卖出：buy[i-1] + prices[i]
 
 - base case
 
@@ -1811,23 +1835,15 @@ var maxProfit = function (prices) {
 
 #### [Best Time to Buy and Sell Stock with Transaction Fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/)
 
-state machine:
-
-buy => sell => buy
-
-buy => rest => buy
-
-sell => rest => sell
-
-convert to dp:
+DP:
 
 - buy[i] = max{ buy[i-1], sell[i-1] - prices[i] }
 
 - sell[i] = max{ sell[i-1], buy[i-1] + prices[i] - fee }
 
-  - sell[i-1]: choose not to operate, rest 1 day
+  - 选择不交易：sell[i-1]: choose not to operate, rest 1 day
 
-  - buy[i-1] + prices[i]: sell based on last day's buy in, and pay transaction fee
+  - 在这一天卖出：buy[i-1] + prices[i] - fee
 
 ```js
 var maxProfit = function (prices, fee) {
@@ -1849,7 +1865,7 @@ var maxProfit = function (prices, fee) {
 };
 ```
 
-Note: could also pay transaction fee when buy in.
+_Note: could also pay transaction fee when buy in._
 
 #### [Best Time to Buy and Sell Stock III](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/)
 
@@ -1877,13 +1893,19 @@ You may complete at most k transactions.
 
 dp[k][i] 表示最多交易 k 次，在前 i 天得到的最大利润。
 
-dp[0][i] = 0; dp[k][0] = 0.
+- base case: dp[0][i] = 0; dp[k][0] = 0
 
-dp[k][i] = max{ dp[k][i-1], max{ prices[i] - prices[j] + dp[k-1][j] } }, j: 0...i-1.
+- 对于每一天：
 
-- 若第 i 天不交易，则沿用前一天的值；
+  - 若第 i 天不交易，则沿用前一天的值
 
-- 若第 i 天交易，则需要在 j: 0...i-1 中选一天买入，并求所有可能情况中的最大值。
+    - `dp[k][i-1]`
+
+  - 若第 i 天交易，则需要在 j: 0...i-1 中选一天买入，并求所有可能情况中的最大值
+
+    - `max{ prices[i] - prices[j] + dp[k-1][j] } }`, j: 0...i-1.
+
+  - 两种情况中取较大值。
 
 ```js
 var maxProfit = function (prices) {
@@ -1904,7 +1926,7 @@ var maxProfit = function (prices) {
 
 ```js
 var maxProfit = function (k, prices) {
-  let dp = [...Array(k + 1)].map(() => Array(prices.length).fill(0));
+  let len = prices.length, dp = [...Array(k + 1)].map(() => Array(len).fill(0)));
   for (let i = 1; i <= k; i++) {
     let max = -prices[0]; // dp[i-1][0] - prices[0]
     for (let j = 1; j < len; j++) {
@@ -1947,6 +1969,8 @@ var maxProfit = function (k, prices) {
 
 #### [Maximum Subarray](https://leetcode.com/problems/maximum-subarray/)
 
+Given an integer array nums, find the contiguous subarray (len >= 1) which has the largest sum and return its sum.
+
 dp[i] 表示子数组 nums[0]...nums[i] 能得到的最大值。对于 dp[i]，若 dp[i-1] > 0 则 nums[i] + dp[i-1]，若 dp[i-1] <= 0，则 dp[i] = nums[i]。
 
 ```js
@@ -1962,22 +1986,24 @@ var maxSubArray = function (nums) {
 };
 ```
 
-optimize
+optimize: just like Best Time to Buy and Sell Stock
 
 ```js
 var maxSubArray = function (nums) {
   let max = -Infinity,
-    c = 0;
+    curr = 0;
   for (let i = 0; i < nums.length; i++) {
-    c += nums[i];
-    max = Math.max(max, c);
-    c = Math.max(0, c);
+    curr += nums[i];
+    curr = Math.max(0, curr);
+    max = Math.max(max, curr);
   }
   return max;
 };
 ```
 
 #### [Minimum Path Sum](https://leetcode.com/problems/minimum-path-sum/)
+
+Given a m x n grid filled with non-negative numbers, find a path from top left to bottom right, which minimizes the sum of all numbers along its path. Can only move either down or right at any point in time.
 
 dp
 
@@ -2023,30 +2049,6 @@ var minPathSum = function (grid) {
 };
 ```
 
-dfs + memo
-
-```js
-var minPathSum = function (grid) {
-  let m = grid.length,
-    n = grid[0].length;
-  let memo = [...Array(m)].map(() => Array(n).fill(Infinity));
-  const dfs = (x, y) => {
-    if (memo[x][y] != Infinity) return memo[x][y];
-    if (x + 1 === m && y + 1 === n) {
-      memo[x][y] = grid[x][y];
-    } else if (x + 1 === m) {
-      memo[x][y] = grid[x][y] + dfs(x, y + 1);
-    } else if (y + 1 === n) {
-      memo[x][y] = grid[x][y] + dfs(x + 1, y);
-    } else {
-      memo[x][y] = Math.min(dfs(x, y + 1), dfs(x + 1, y)) + grid[x][y];
-    }
-    return memo[x][y];
-  };
-  return dfs(0, 0);
-};
-```
-
 #### [Unique Paths](https://leetcode.com/problems/unique-paths/description/)
 
 ```js
@@ -2076,7 +2078,7 @@ i = 0: dp[0] = 1;
 
 i = 1: dp[1] = 1;
 
-i >= 2: dp[i] = sum { dp[j] \* dp[i-1-j] }, 0 <= j < i. (i-1 means exclude root)
+i >= 2: `dp[i] = sum { dp[j] * dp[i - 1 - j] }`, 0 <= j < i. (i - 1 to exclude root)
 
 ```js
 var numTrees = function (n) {
@@ -2115,10 +2117,6 @@ var generateTrees = function (n) {
 ```
 
 time complexity: T(n)=T(0)T(n-1)+T(1)T(n-2)+...+T(n-1)T(0) => catalan number => O(4^n)
-
-空间换时间 => 加上 DP：dp[l][r]
-
-节点之间可能 overlap => clone
 
 ### Others
 
@@ -2188,6 +2186,8 @@ var wiggleMaxLength = function (nums) {
 
 #### [Maximum Product Subarray](https://leetcode.com/problems/maximum-product-subarray/)
 
+Given an integer array nums, find a contiguous non-empty subarray within the array that has the largest product, and return the product.
+
 imax/imin stores the max/min product of subarray that ends with the current number A[i];
 
 multiplied by a negative makes big number smaller, small number bigger, so we redefine the imax & imin by swapping them;
@@ -2200,7 +2200,7 @@ the newly computed max value is a candidate for our global result.
 var maxProduct = function (nums) {
   let max = nums[0];
   for (let i = 1, imax = max, imin = max; i < nums.length; i++) {
-    if (nums[i] < 0) [imin, imax] = [imax, imin];
+    if (nums[i] < 0) [imin, imax] = [imax, imin]; // swap for negative numbers
     imax = Math.max(nums[i], imax * nums[i]);
     imin = Math.min(nums[i], imin * nums[i]);
     max = Math.max(max, imax);
@@ -2209,27 +2209,11 @@ var maxProduct = function (nums) {
 };
 ```
 
-or
-
-```js
-var maxProduct = function (nums) {
-  let max = nums[0];
-  for (let i = 1, imax = max, imin = max; i < nums.length; i++) {
-    let tmax = imax * nums[i],
-      tmin = imin * nums[i];
-    imax = Math.max(tmax, tmin, nums[i]);
-    imin = Math.min(tmax, tmin, nums[i]);
-    max = Math.max(max, imax);
-  }
-  return max;
-};
-```
-
 #### [Integer Break](https://leetcode.com/problems/integer-break/)
 
-dp[i] 表示整数 i 对应的最大乘积。
+dp[i] 表示整数 i 对应的最大乘积。由于 i 是递增的，可以将其分成两部分，使得这两部分乘积最大，这两部分构成了子问题。
 
-则对于 j: 1...i/2，有 maxLeft = Math.max(j, dp[j]), maxRight = Math.max(i-j, dp[i-j]), dp[i] = Math.max(dp[i], maxLeft \* maxRight)
+则对于 j: 1...i/2，有 `maxLeft = Math.max(j, dp[j])`, `maxRight = Math.max(i-j, dp[i-j])`, `dp[i] = Math.max(dp[i], maxLeft * maxRight)`
 
 ```js
 var integerBreak = function (n) {
@@ -2249,6 +2233,8 @@ var integerBreak = function (n) {
 ```
 
 #### [Non-negative Integers without Consecutive Ones](https://leetcode.com/problems/non-negative-integers-without-consecutive-ones/)
+
+Given a positive integer n, find the number of non-negative integers less than or equal to n, whose binary representations do NOT contain consecutive ones.
 
 zero[i]: the number of binary strings of length i which do not contain any two consecutive 1’s and which end in 0.
 
@@ -2278,6 +2264,12 @@ var findIntegers = function (num) {
 
 #### [Decode Ways](https://leetcode.com/problems/decode-ways/)
 
+dp[i] 表示前 i 个字符可能的编码数。
+
+- 认为当前字符对应一位数，则前一位必须不能是 0: dp[i] += dp[i-1];
+
+- 认为当前字符对应两位数，则前一位为 1 或者前一位为 2 且当前位小于 6: dp[i] += dp[i - 2];
+
 ```js
 var numDecodings = function (s) {
   if (!s || s.length === 0) return 0;
@@ -2298,6 +2290,8 @@ var numDecodings = function (s) {
 ```
 
 #### [Word Break](https://leetcode.com/problems/word-break/)
+
+Given a string s and a dictionary of strings wordDict, return true if s can be segmented into a space-separated sequence of one or more dictionary words.
 
 两种思路。
 
@@ -2389,6 +2383,8 @@ function trap(heights) {
 
 #### [Regular Expression Matching](https://leetcode.com/problems/regular-expression-matching/)
 
+'\*' Matches zero or more of the preceding element.
+
 '.' 可以匹配任意单个字符，所以只需要依次比对每个字符即可。但由于 '\*' 的存在，需要每次考虑两位字符。
 
 - 如果前两个字符不含 '\*'，只需比较第一个字符，然后递归 s.slice(1) & p.slice(1)；
@@ -2472,6 +2468,32 @@ var isMatch = function (s, p) {
 };
 ```
 
+#### [Wildcard Matching](https://leetcode.com/problems/wildcard-matching/)
+
+```js
+var isMatch = function (s, p) {
+  let m = s.length,
+    n = p.length,
+    dp = [...Array(m + 1)].map(() => Array(n + 1).fill(false));
+  dp[0][0] = true;
+  for (let j = 1; j <= n; j++) {
+    if (p[j - 1] === "*") dp[0][j] = true;
+    else break;
+  }
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (p[j - 1] !== "*") {
+        dp[i][j] =
+          dp[i - 1][j - 1] && (s[i - 1] === p[j - 1] || p[j - 1] === "?");
+      } else {
+        dp[i][j] = dp[i - 1][j] || dp[i][j - 1];
+      }
+    }
+  }
+  return dp[m][n];
+};
+```
+
 #### [Knight Dialer](https://leetcode.com/problems/knight-dialer/)
 
 1. smart dp
@@ -2481,7 +2503,8 @@ pad:
 1 2 3
 4 5 6
 7 8 9
-0
+
+- 0 #
 
 dp[i][j] 表示号码长度为 i 时，以数字 j 为结尾的数量。注意 dp[1][5] = 0。
 
@@ -2495,7 +2518,7 @@ var knightDialer = function (n) {
     dp = [1, 1, 1, 1, 1, 0, 1, 1, 1, 1];
   for (let i = 1; i < n; i++) {
     dp = [
-      (dp[4] + dp[6]) % MOD,
+      (dp[4] + dp[6]) % MOD, // 0 can be reached via 4 / 6
       (dp[6] + dp[8]) % MOD,
       (dp[7] + dp[9]) % MOD,
       (dp[4] + dp[8]) % MOD,
@@ -2554,6 +2577,14 @@ var knightDialer = function (n) {
 ```
 
 #### [Integer Replacement](https://leetcode.com/problems/integer-replacement/)
+
+Given a positive integer n, you can apply one of the following operations:
+
+If n is even, replace n with n / 2.
+
+If n is odd, replace n with either n + 1 or n - 1.
+
+Return the minimum number of operations needed for n to become 1.
 
 TODO: bit manipulation
 
