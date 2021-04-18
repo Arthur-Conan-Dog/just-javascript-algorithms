@@ -82,6 +82,24 @@ Remember that memoization is just a cache of the function results. In recursive 
 
 各类复杂的背包问题总可以变换为简单的 0-1 背包问题进行求解。
 
+总结：
+
+可选物品是否能被多次选中？
+
+- 不能 => 0-1 背包。
+
+  - 物品选择有多维限制？（如除重量外，还限制最多只能取 m[i] 件物品）
+
+    - 有 => 多维费用的 0-1 背包问题。加一个纬度。见 Ones and Zeroes。
+
+- 能 => 完全背包
+
+  - 物品的拿取顺序是否影响结果？
+
+    - 不影响 => 一般完全背包问题。组合。
+
+    - 影响 => 涉及顺序的完全背包问题。排列。
+
 #### 1. 0-1 背包问题
 
 状态变量：可选择的物品种类、可容纳的最大重量。
@@ -94,13 +112,13 @@ dp 定义：dp[i][j] 可选择的物品种类为前 i 种，可容纳的最大�
 
 假设已知前 i - 1 种可选的物品种类对应所有可能存在的背包重量下，能达到的最大价值，即已知 dp[i-1][0...w]，如何推出 dp[i][0...w]？
 
-- 无法用物品 i 替换背包中的物品，即 j < w[i]，则 dp[i][j] = dp[i-1][j];
+- 无法用物品 i 替换背包中的物品，即 j < w[i]，则 `dp[i][j] = dp[i-1][j]`;
 
 - 可以用物品 i 替换背包中的物品，即 j >= w[i]，则：
 
-  - 若不放入物品 i，则 dp[i][j] = dp[i-1][j];
+  - 若不放入物品 i，则 `dp[i][j] = dp[i-1][j]`;
 
-  - 若放入物品 i，则 dp[i][j] = dp[i-1]j-w[i]] + v[i];
+  - 若放入物品 i，则 `dp[i][j] = dp[i-1][j-w[i]] + v[i]`;
 
   - 比较两种情况取较大值。
 
@@ -146,15 +164,15 @@ dp 定义：dp[i][j] 可选择的物品种类为前 i 种，可容纳的最大�
 
 假设已知前 i - 1 种可选的物品种类对应所有可能存在的背包重量下，能达到的最大价值，即已知 dp[i-1][0...w]，如何推出 dp[i][0...w]？
 
-- 不可能用物品 i 替换背包中的物品，即 j < w[i]，则 dp[i][j] = dp[i-1][j];
+- 不可能用物品 i 替换背包中的物品，即 j < w[i]，则 `dp[i][j] = dp[i-1][j]`;
 
 - 可以用物品 i 替换背包中的物品，即 j >= w[i]，则：
 
-  - 若不放入物品 i，则 dp[i][j] = dp[i-1][j];
+  - 若不放入物品 i，则 `dp[i][j] = dp[i-1][j]`;
 
-  - 若放入物品 i，则 dp[i][j] = dp[i]j-w[i]] + v[i];
+  - 若放入物品 i，则 `dp[i][j] = dp[i][j-w[i]] + v[i]`;
 
-    - _Note: 由于物品 i 可以重复选择，所以需要依赖的子问题变成了：dp[i]j-w[i]]，即可能已选入物品 i，与 0-1 背包中的子问题：dp[i-1]j-w[i]]是不同的。_
+    - _Note: 由于物品 i 可以重复选择，所以需要依赖的子问题变成了：`dp[i][j-w[i]]`，即可能已选入物品 i，与 0-1 背包中的子问题：`dp[i-1][j-w[i]]`是不同的。_
 
   - 比较两种情况取较大值。
 
@@ -192,25 +210,11 @@ for (let j = w; j <= W; j++) {
 
 2. 转换成 0-1 背包问题。将一种物品可被多次选择转化成多种物品每种只能选一次。比如，每种物品最多选 Math.floor(W / w[i]) 件 => 该种物品转换成 Math.floor(W / w[i]) 件费用和价值均相等的物品，不过这样对于时间复杂度没有改善。再比如：拆成 w[i] <= w[i]\*2^k <= W 的物品，对应可以拆成 log(W/w[i]) 件，将选 x 件第 i 种物品通过选了 1 件 x 个第 i 种物品的和来简介表示，较前者有所改善。
 
-3. 转换成 0-1 背包问题。重新回顾 0-1 背包问题的 dp 含义：dp[i][j] 表示只使用前 i 种物品，容量为 j 的情况下，所能得到的最大价值。状态转移方程：dp[i][j] = dp[i-1][j] 表示完全不用第 i 种物品；dp[i][j] = dp[i-1]j-w[i]] + v[i] 则表示在考虑选用第 i 种物品时，需要依赖的子问题为：此前**完全未选择过**第 i 种物品，且能容量能允许再放入**一个**物品 i。那么当物品 i 可以被重复选择时，在考虑“选用第 i 种物品”这一策略时，依赖的子问题就变成了：可能选择过第 i 种物品，且容量能允许再放入一个物品 i，即 dp[i][j] = dp[i]j-w[i]] + v[i]。
-
-3) 总结套路
-
-可选物品是否能被多次选中？
-
-- 不能 => 0-1 背包。
-
-- 能 => 完全背包
-
-  - 物品的拿取顺序是否影响结果？
-
-    - 不影响 => 一般完全背包问题。组合。
-
-    - 影响 => 涉及顺序的完全背包问题。排列。
-
-TODO: 求 max / min / numbers。
+3. 转换成 0-1 背包问题。重新回顾 0-1 背包问题的 dp 含义：dp[i][j] 表示只使用前 i 种物品，容量为 j 的情况下，所能得到的最大价值。状态转移方程：`dp[i][j] = dp[i-1][j]` 表示完全不用第 i 种物品；`dp[i][j] = dp[i-1][j-w[i]] + v[i]` 则表示在考虑选用第 i 种物品时，需要依赖的子问题为：此前**完全未选择过**第 i 种物品，且能容量能允许再放入**一个**物品 i。那么当物品 i 可以被重复选择时，在考虑“选用第 i 种物品”这一策略时，依赖的子问题就变成了：可能选择过第 i 种物品，且容量能允许再放入一个物品 i，即 `dp[i][j] = dp[i][j-w[i]] + v[i]`。
 
 #### [Partition Equal Subset Sum](https://leetcode.com/problems/partition-equal-subset-sum/)
+
+Given a non-empty array nums containing only positive integers, find if the array can be partitioned into two subsets such that the sum of elements in both subsets is equal.
 
 0-1 背包变体。转换背包容量。
 
@@ -235,11 +239,16 @@ var canPartition = function (nums) {
 
 #### [Target Sum](https://leetcode.com/problems/target-sum/description/)
 
+Adding one of the symbols '+' and '-' before each integer in nums and then concatenate all the integers. Return the number of different expressions that you can build, which evaluates to target.
+
 0-1 背包变体。转换背包容量。
 
 sum(P) - sum(N) = target
+
 sum(P) - sum(N) + sum(P) + sum(N) = target + sum
+
 sum(P) \* 2 = target + sum
+
 sum(P) = (target + sum) / 2
 
 ```js
@@ -287,6 +296,8 @@ var findTargetSumWays = function (nums, S) {
 
 #### [Last Stone Weight II](https://leetcode.com/problems/last-stone-weight-ii/)
 
+Return the smallest possible weight of the left stone. If there are no stones left, return 0.
+
 0-1 背包变体。将石头分成两波，两波总重越接近，得到的结果越小。dp[i] 表示总重为 i 时，能装入石头的最大值。
 
 ```js
@@ -308,12 +319,16 @@ var lastStoneWeightII = function (stones) {
 
 #### [Split Array With Same Average](https://leetcode.com/problems/split-array-with-same-average/)
 
+Given an integer array nums, move each element of nums into one of the two arrays A and B such that A and B are non-empty, and average(A) == average(B). Return true if it is possible to achieve that and false otherwise.
+
 sum(A) / count(A) = sum(B) / count(B); count(B) = n - count(A); sum(B) = total - sum(A)
 => sum(A) / count(A) = total / n
 
-early pruning: check possibilities, which 1 <= count(A) <= n / 2.
+assume A is the smaller half, then 1 <= count(A) <= n / 2.
 
-0-1 背包 => combination sum of all possible count(A)
+early pruning: since sum(A) must be an integer, and we have count(A) in [1, n / 2], we can check for all possible count(A), if there exists one that makes `(total \* count(A)) % n === 0`.
+
+0-1 背包 => combination sum of all possible count(A). dp[i] 表示当可选前 i 个数时，能得到的所有组合的和的情况。
 
 ```js
 var splitArraySameAverage = function (nums) {
@@ -349,7 +364,9 @@ function isPossible(total, m, n) {
 
 #### [Ones and Zeroes](https://leetcode.com/problems/ones-and-zeroes/description/)
 
-多维费用的 0-1 背包问题。费用加了一维，只需状态也加一维。dp[i][j][k] 表示只使用前 i 个字符串，zero 数量为 j 时，one 数量为 k 时，最多能加入解集的字符串个数。其中 j <= m, k <= n。下面的实现简化去掉了 i 层，简化思路见 0-1 背包。
+Given an array of binary strings strs and two integers m and n. Return the size of the largest subset of strs such that there are at most m 0's and n 1's in the subset.
+
+多维费用的 0-1 背包问题。费用加了一维，只需状态也加一维。`dp[i][j][k]` 表示只使用前 i 个字符串，zero 数量为 j 时，one 数量为 k 时，最多能加入解集的字符串个数。其中 j <= m, k <= n。下面的实现简化去掉了 i 层，简化思路见 0-1 背包。
 
 ```js
 var findMaxForm = function (strs, m, n) {
@@ -372,9 +389,7 @@ var findMaxForm = function (strs, m, n) {
 
 fewest number of coins that you need to make up that amount, the number of each kind of coin is unlimited.
 
-思路：
-
-1. 完全背包问题（coins 循环在外）。套入完全背包模板，修改基础状态值，处理边界情况。
+1. 完全背包
 
 由于 coin 面值最小为 1，所以使用的 coin 总数不可能超过 amount，可以将 amount + 1 作为约束值。base case：当 amount = 0 时，dp[0...N][0] = 0，但额外写循环比较麻烦，可以在 j = w 时直接处理，即 `if (j === w) dp[i][j] = 1;`。
 
@@ -421,22 +436,7 @@ var coinChange = function (coins, amount) {
 };
 ```
 
-2. 根据原本题意，得到本题的状态转移方程。dp[n] 表示总价值为 n 时，所用的最小 coin 数量。对于 n 的每个取值，我们有 coin of coins 种选择，对比不同选择下哪种更小。
-
-```js
-var coinChange = function (coins, amount) {
-  let dp = Array(amount + 1).fill(amount + 1);
-  dp[0] = 0;
-  for (let n = 0; n <= amount; n++) {
-    for (let coin of coins) {
-      if (n >= coin) dp[n] = Math.min(dp[n], dp[n - coin] + 1);
-    }
-  }
-  return dp[amount] === amount + 1 ? -1 : dp[amount];
-};
-```
-
-3. dfs + memo
+2. dfs + memo
 
 ```js
 var coinChange = function (coins, amount) {
@@ -496,7 +496,7 @@ var change = function (amount, coins) {
 };
 ```
 
-优化代码
+优化空间
 
 ```js
 var change = function (amount, coins) {
@@ -517,7 +517,7 @@ positive numbers, no duplicates, number of combinations that add up to a positiv
 
 涉及顺序的完全背包问题。排列问题。
 
-对于 coin change 2 来说，dp[i][j] 表示只使用前 i 种硬币，拼出总值 j 的方法数，即在处理 dp[i][j] 时只考虑用与不用第 i 种硬币，不能考虑用与不用前 i - 1 种硬币，否则情况会重复。比如：[1,2,2] [2,1,2] [2,2,1] 对于 coin change 2 来说表示的是同一种情况。coins 作为外层循环，保证了 coin 的拿取顺序不会重复。
+对于 coin change 2 来说，`dp[i][j]` 表示只使用前 i 种硬币，拼出总值 j 的方法数，即在处理 `dp[i][j]` 时只考虑用与不用第 i 种硬币，不能考虑用与不用前 i - 1 种硬币，否则情况会重复。比如：[1,2,2] [2,1,2] [2,2,1] 对于 coin change 2 来说表示的是同一种情况。coins 作为外层循环，保证了 coin 的拿取顺序不会重复。
 
 但对于本题来说，coin 使用顺序不同，即使总和相同，也是两种不同的情况，都要被计算在内，因而计算结果时无需再刻意保证 coins 的拿取顺序，而要保证每次拿取时都是从全部 coins 种去选择。
 
@@ -525,7 +525,7 @@ positive numbers, no duplicates, number of combinations that add up to a positiv
 
 dp[i] 表示用 coins 拼出总和为 i 的排列数。dp[0] = 1。
 
-已知 dp[0...i-1] 求 dp[i]。计算每种选择下的排列数，并相加，即：判断是否可能放入 coins[0] (i >= coins[0])，若不能数量不增加，若能则增加 dp[i-coins[0]] 种排列；是否可能放入 coins[1]...。
+已知 dp[0...i-1] 求 dp[i]。计算每种选择下的排列数，并相加，即：判断是否可能放入 coins[0] (i >= coins[0])，若不能数量不增加，若能则增加 `dp[i-coins[0]]` 种排列；是否可能放入 coins[1]...。
 
 ```js
 var combinationSum4 = function (nums, target) {
@@ -543,6 +543,8 @@ var combinationSum4 = function (nums, target) {
 从递归角度思考：https://leetcode.com/problems/combination-sum-iv/discuss/85036/1ms-Java-DP-Solution-with-Detailed-Explanation
 
 #### [Minimum Cost For Tickets](https://leetcode.com/problems/minimum-cost-for-tickets/)
+
+Return the minimum number of dollars you need to travel every day in the given list of days.
 
 coin change 变体。
 
@@ -567,19 +569,19 @@ var mincostTickets = function (days, costs) {
 };
 ```
 
-但这种方式需要一个 set 的额外空间来帮助查找。另一种方式：dp[i] 表示 days[0...i] 天所需的最小开销，1 <= i <= days.length。对于每种续签方式，回溯找到 days 中距离这种方式最近的日期，再在三者中去最小值。回溯找到 days 中距离这种方式最近的日期 => 隐式规避了 `dp[i] = dp[i - 1];` 处理不出行的那些日子。
+但这种方式需要一个 set 的额外空间来帮助查找。另一种方式：dp[i] 表示 days[0...i] 天所需的最小开销，1 <= i <= days.length。对于每种续签方式，回溯找到 days 中距离这种方式最近的日期，再在三者中取最小值。回溯找到 days 中距离这种方式最近的日期 => 隐式规避了处理不出行的那些日子，即 `dp[i] = dp[i - 1];`。
 
 ```js
 var mincostTickets = function (days, costs) {
   let n = days.length,
     dp = Array(n).fill(Infinity),
     passes = [1, 7, 30];
-  dp[0] = Math.min(...costs);
+  dp[0] = Math.min(...costs); // base case: days[0] 第一天的最小开销应该是三种方式中花费最少的那种
   for (let i = 1; i <= n; i++) {
     let j = i;
     for (let k = 0; k < 3; k++) {
       while (j >= 0 && days[j] > days[i] - passes[k]) j--;
-      dp[i] = Math.min(dp[i], dp[Math.max(0, j)] + costs[k]);
+      dp[i] = Math.min(dp[i], dp[Math.max(0, j)] + costs[k]); // j 可能越界
     }
   }
   return dp[n - 1];
@@ -590,7 +592,9 @@ var mincostTickets = function (days, costs) {
 
 #### [Perfect Squares](https://leetcode.com/problems/perfect-squares/)
 
-完全背包问题。可选择的“物品”根据条件为：j 从 1 开始，同时 j \* j <= i。
+Given an integer n, return the least number of perfect square numbers that sum to n.
+
+完全背包问题。可选择的“物品”根据条件为：j 从 1 开始，同时 `j * j <= i`。
 
 ```js
 var numSquares = function (n) {
