@@ -214,7 +214,7 @@ var hasCycle = function (head) {
 
 return the node where the cycle begins.
 
-快慢指针。数学思想。
+快慢指针。
 
 ```js
 var detectCycle = function (head) {
@@ -238,13 +238,16 @@ var detectCycle = function (head) {
 ```
 
 x1: head to cycle begin node;
+
 x2: cycle begin node to slow & fast meet node;
+
 x3: remaining cycle(slow & fast meet node to cycle begin node).
 
 fast: x1 + x2 + x3 + x2
+
 slow: x1 + x2
 
-2\*slow = fast => x1 = x3
+2 * slow = fast => x1 = x3
 
 #### [Intersection of Two Linked Lists](https://leetcode.com/problems/intersection-of-two-linked-lists)
 
@@ -268,15 +271,15 @@ a + c & b + c => a + c + b = a + b + c
 
 remove the nth node from the **end** of the list.
 
-快慢指针。
+快慢指针。length - n.
 
 ```js
 var removeNthFromEnd = function (head, n) {
   if (!head) return null;
-  let node = new ListNode(),
-    fast = node,
-    slow = node;
-  node.next = head;
+  let dummy = new ListNode(),
+    fast = dummy,
+    slow = dummy;
+  dummy.next = head;
   for (let i = 0; i < n; i++) {
     fast = fast.next;
   }
@@ -285,11 +288,9 @@ var removeNthFromEnd = function (head, n) {
     slow = slow.next;
   }
   slow.next = slow.next.next;
-  return node.next;
+  return dummy.next;
 };
 ```
-
-length - n
 
 #### [Odd Even Linked List](https://leetcode.com/problems/odd-even-linked-list)
 
@@ -498,6 +499,8 @@ var reverseKGroup = function (head, k) {
 ```
 
 #### [Reverse Linked List II](https://leetcode.com/problems/reverse-linked-list-ii)
+
+Given the head of a singly linked list and two integers left and right where left <= right, reverse the nodes of the list from position left to position right, and return the reversed list.
 
 反转链表变体。
 
@@ -866,7 +869,7 @@ var copyRandomList = function (head) {
 
 #### [Rotate List](https://leetcode.com/problems/rotate-list/)
 
-一点数学思想，找到从左向右数对应的序号。一点巧思：将链表首尾相接，同时更新首尾最后再恢复。
+找到从左向右数对应的序号，将链表首尾相接，同时移动首尾到指定位置，最后再恢复。
 
 ```js
 var rotateRight = function (head, k) {
