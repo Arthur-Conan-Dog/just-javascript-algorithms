@@ -771,6 +771,8 @@ var findTheCity = function (n, edges, distanceThreshold) {
 
 #### [Network Delay Time](https://leetcode.com/problems/network-delay-time/)
 
+Send a signal from a given node k, return the time it takes for all the n nodes to receive the signal. 
+
 Floyd
 
 ```js
@@ -805,9 +807,8 @@ function networkDelayTime(times, N, K) {
     adj[u].push([v, w]);
   }
 
-  // [node, priority(dist from source to current node)]
   const pq = new PriorityQueue((a, b) => a[1] - b[1]);
-  pq.enqueue([K, 0]);
+  pq.enqueue([K, 0]); // [node, priority(dist from source to current node)]
   dist[K] = 0;
 
   while (pq.size() > 0) {
@@ -986,6 +987,8 @@ var maxAreaOfIsland = function (grid) {
 
 #### [Surrounded Regions](https://leetcode.com/problems/surrounded-regions/)
 
+Given an m x n matrix board containing 'X' and 'O', capture all regions surrounded by 'X'.
+
 Start DFS from nodes at boundary
 
 ```js
@@ -1135,7 +1138,9 @@ var findRedundantConnection = function (edges) {
 #### [Find Eventual Safe States](https://leetcode.com/problems/find-eventual-safe-states/)
 
 status[node] = 0: node has not been visited yet
+
 status[node] = 1: node is on the seeing path
+
 status[node] = 2: node has been seen
 
 ```js
@@ -1234,6 +1239,8 @@ function dfs(adjs, from, to, product = 1, seen = new Set()) {
 ### BFS
 
 #### [01 Matrix](https://leetcode.com/problems/01-matrix/)
+
+Given a matrix consists of 0 and 1, find the distance of the nearest 0 for each cell.
 
 ```js
 var updateMatrix = function (matrix) {
@@ -1351,8 +1358,7 @@ var maxDistance = function (grid) {
       for (let [dx, dy] of directions) {
         let x = i + dx,
           y = j + dy;
-        if (x < 0 || x >= rows || y < 0 || y >= cols) continue;
-        if (grid[x][y] === 1) continue;
+        if (x < 0 || x >= rows || y < 0 || y >= cols || grid[x][y] === 1) continue;
         dis[x][y] = Math.max(
           dis[i][j],
           dis[i][j] + Math.abs(i - x) + Math.abs(j - y)

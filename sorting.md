@@ -364,11 +364,14 @@ The Heapsort algorithm involves preparing the list by first turning it into a ma
 
 ##### binary heap
 
-N: size of current heap
-k = 0, not using.
+N: size of current heap. k = 0, not using.
+
 parent: Math.floor(k/2)
+
 left child: 2*k
+
 right child: 2*k + 1
+
 operations: swim(go-up) & sink(go-down)
 
 swim: child node's val is larger than the parent node's val
@@ -588,8 +591,7 @@ var minMoves2 = function(nums) {
 
 time complexity must be better than O(n log n) => HashMap + 桶排序。
 
-map: num => feq;
-buckets: index as feq, [index] => elements.
+map: num => feq; buckets: index as feq, [index] => elements.
 
 naturally sorted by index.
 
