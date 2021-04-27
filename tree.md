@@ -1843,7 +1843,6 @@ var sortedListToBST = function (head) {
 
 convert to sorted array, and re-build. inorder + Convert Sorted Array to Binary Search Tree.
 
-
 #### [Largest BST Subtree](https://github.com/grandyang/leetcode/issues/333)
 
 ```js

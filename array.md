@@ -878,6 +878,59 @@ var reconstructQueue = function (people) {
 
 ## Others
 
+### [Maximum Swap](https://leetcode.com/problems/maximum-swap/)
+
+O(n^2)
+
+```js
+function maximumSwap(num) {
+  let arr = num.toString().split('').map(ch => Number.parseInt(ch));
+
+  for (let i = 0; i < arr.length; i++) {
+    let j = i, max = i;
+    while (j < arr.length) {
+      if (arr[max] <= arr[j]) max = j;
+      j++;
+    }
+    if (max !== i && arr[i] !== arr[max]) {
+      let temp = arr[i];
+      arr[i] = arr[max];
+      arr[max] = temp;
+      return parseInt(arr.join(""));
+    }
+  }
+  return num;
+}
+```
+
+O(n): record last pos in num for each digit
+
+```js
+function maximumSwap(num) {
+  let arr = num
+      .toString()
+      .split("")
+      .map((ch) => parseInt(ch)),
+    buckets = Array(10).fill(0);
+  for (let i = 0; i < arr.length; i++) {
+    buckets[arr[i]] = i; // record last pos of this digit in num
+  }
+
+  for (let i = 0; i < arr.length; i++) {
+    for (let k = 9; k > arr[i]; k--) {
+      if (buckets[k] > i) {
+        let tmp = arr[i];
+        arr[i] = arr[buckets[k]];
+        arr[buckets[k]] = tmp;
+        return parseInt(arr.join(""));
+      }
+    }
+  }
+
+  return num;
+}
+```
+
 ### [Rotate Array](https://leetcode.com/problems/rotate-array/)
 
 Given an array, rotate the array to the right by k steps.

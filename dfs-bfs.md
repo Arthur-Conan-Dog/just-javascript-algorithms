@@ -62,6 +62,48 @@ var pacificAtlantic = function (matrix) {
 };
 ```
 
+### [Number of Distinct Island](https://github.com/grandyang/leetcode/issues/694)
+
+An island is considered to be the same as another if and only if one island can be translated (and not rotated or reflected) to equal the other.
+
+```js
+function numberOfDistinctIslands(board) {
+  let m = board.length,
+    n = board[0].length,
+    res = new Set();
+  const directions = [
+    [0, 1],
+    [0, -1],
+    [1, 0],
+    [-1, 0],
+  ];
+
+  const dfs = (i, j, ix, iy, set) => {
+    for (let [dx, dy] of directions) {
+      let x = i + dx,
+        y = j + dy;
+      if (x < 0 || y < 0 || x >= m || y >= n || board[x][y] === 0) continue;
+      board[x][y] = 0;
+      set.add(`${x - ix}_${y - iy}`);
+      dfs(x, y, ix, iy, set);
+    }
+  };
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (board[i][j] === 1) {
+        let set = new Set();
+        dfs(i, j, i, j, set);
+        let rec = [...set].join('_');
+        if (!res.has(rec)) {
+          res.add(rec);
+        }
+      }
+    }
+  }
+  return res.size;
+}
+```
+
 ## backtracking
 
 The backtracking algorithms consists of the following steps:
@@ -627,6 +669,34 @@ var judgePoint24 = function (nums) {
   };
   return dfs(nums);
 };
+```
+
+### [The Maze](https://github.com/grandyang/leetcode/issues/490)
+
+How to keep the ball rolling until it meets a wall?
+
+```js
+function hasPath(map, start, destination) {
+  let seen = new Set(), m = map.length, n = map[0].length;
+  const directions = [[0,1], [0,-1], [1,0], [-1,0]];
+  const dfs = (i, j) => {
+    if (i === destination[0] && j === destination[1]) return true;
+    for (let [dx, dy] of directions) {
+      let x = i, y = j;
+      while ((x + dx) >= 0 && (x + dx) < m && (y + dy) >= 0 && (y + dy) < n && map[(x + dx)][(y + dy)] !== 1) {
+        x = x + dx;
+        y = y + dy;
+      }
+      if (i === x && j === y) continue;
+      if (!seen.has(x + '_' + y)) {
+        seen.add(x + '_' + y);
+        if (dfs(x, y)) return true;
+      }
+    }
+    return false;
+  }
+  return dfs(start[0], start[1]);
+}
 ```
 
 # bfs

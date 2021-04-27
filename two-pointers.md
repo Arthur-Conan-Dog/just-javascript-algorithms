@@ -158,6 +158,29 @@ function pourWater(heights, V, K) {
 }
 ```
 
+
+### [Valid Triangle Number](https://leetcode.com/problems/valid-triangle-number/)
+
+```js
+function triangleNumber(nums) {
+  let res = 0, n = nums.length;
+  nums.sort((a, b) => a - b);
+  for (let k = n - 1; k >= 0; k--) {
+    for (let i = 0, j = k - 1; i < j;) {
+      if (nums[i] + nums[j] > nums[k]) {
+        res += j - i;
+        j--;
+      } else {
+        i++;
+      }
+    }
+  }
+  return res;
+}
+```
+
+[ref](https://leetcode.com/problems/valid-triangle-number/discuss/128135/A-similar-O(n2)-solution-to-3-Sum)
+
 ## Two pointers & String
 
 ### [Reverse Vowels of a String](https://leetcode.com/problems/reverse-vowels-of-a-string/)
