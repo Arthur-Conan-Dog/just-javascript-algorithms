@@ -247,7 +247,7 @@ fast: x1 + x2 + x3 + x2
 
 slow: x1 + x2
 
-2 * slow = fast => x1 = x3
+2 \* slow = fast => x1 = x3
 
 #### [Intersection of Two Linked Lists](https://leetcode.com/problems/intersection-of-two-linked-lists)
 
@@ -412,7 +412,25 @@ var findDuplicate = function (nums) {
 
 #### [Merge k Sorted Lists](https://leetcode.com/problems/merge-k-sorted-lists/)
 
-合并有序链表变体。二分，递归合并。
+average length of lists is n.
+
+1. merge lists one by one
+
+```js
+function mergeKLists(lists) {
+  let res = null;
+  for (let l of lists) {
+    res = merge(res, l); // merge basic operation
+  }
+  return res;
+}
+```
+
+time complexity: O(n), O(2n), O(3n) ... O(kn) => O(k(1+k)n/2) => O(k^2*n)
+
+space complexity: O(1)
+
+2. divide and conquer
 
 ```js
 var mergeKLists = function (lists) {
@@ -421,30 +439,45 @@ var mergeKLists = function (lists) {
 
 function partition(lists, start, end) {
   if (start === end) return lists[start];
+  if (start > end) return null;
 
-  if (start < end) {
-    let mid = Math.floor((start + end) / 2),
-      left = partition(lists, start, mid),
-      right = partition(lists, mid + 1, end);
-    return merge(left, right);
-  }
-
-  return null;
-}
-
-function merge(l1, l2) {
-  if (!l1) return l2;
-  if (!l2) return l1;
-
-  if (l1.val <= l2.val) {
-    l1.next = merge(l1.next, l2);
-    return l1;
-  } else {
-    l2.next = merge(l1, l2.next);
-    return l2;
-  }
+  let mid = Math.floor((start + end) / 2),
+    left = partition(lists, start, mid),
+    right = partition(lists, mid + 1, end);
+  return merge(left, right);
 }
 ```
+
+time complexity: for the recursion tree, it has logk levels, for each level, it needs O(k\*n) => O(k\*n\*logk)
+
+space complexity: O(logk) for recursion stack space.
+
+3. merge node of lists one by one
+
+=> how to quickly find the current min in these lists?
+
+=> priority queue
+
+```js
+function mergeKLists(lists) {
+  let pq = new PriorityQueue((a, b) => a.val - b.val);
+  for (let l of lists) {
+    if (l) pq.enqueue(l);
+  }
+  let dummy = new ListNode(), node = dummy;
+  while (pq.size()) {
+    let currMin = pq.dequeue();
+    node.next = currMin;
+    node = node.next;
+    if (currMin.next) pq.enqueue(currMin.next);
+  }
+  return dummy.next;
+}
+```
+
+time complexity: O(k*n) nodes, O(logk) for each enqueue & dequeue operation => O(k\*n\*logk)
+
+space complexity: O(k) for PQ.
 
 #### [Reverse Nodes in k-Group](https://leetcode.com/problems/reverse-nodes-in-k-group/)
 
@@ -787,7 +820,7 @@ var flatten = function (head) {
 
 #### [Copy List with Random Pointer](https://leetcode.com/problems/copy-list-with-random-pointer)
 
-1) HashMap O(N) & O(N)
+1. HashMap O(N) & O(N)
 
 iteration
 
@@ -828,7 +861,7 @@ var copyRandomList = function (head) {
 };
 ```
 
-2) 1st iteration, link copy node right behind the original node; 2nd iteration, copy random pointers; 3rd iteration, extract copy nodes and recover original list. O(N) & O(1)
+2. 1st iteration, link copy node right behind the original node; 2nd iteration, copy random pointers; 3rd iteration, extract copy nodes and recover original list. O(N) & O(1)
 
 ```js
 var copyRandomList = function (head) {
