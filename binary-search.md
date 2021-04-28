@@ -1,6 +1,12 @@
 # Binary Search
 
-实现前需要想好区间形式是 [] 还是 [)。
+要素：
+
+- 有序区间，找到某个符合条件的元素 / 符合条件的区间的左右边界。
+
+- 寻找边界：满足某种条件时收缩区间哪一侧？找左边界 => 收缩右侧。
+
+- 实现前需要明确区间形式是 [] 还是 [)。
 
 ## Implementation
 
@@ -113,7 +119,45 @@ function rightBound(arr, target) {
 
 ### 前闭后开的实现
 
-更简洁，少一次 l = r 时的对比，且退出循环时 l & r 值相等。
+对于不存在重复元素的通常二分搜索，和寻找左边界的二分搜索来说，更简洁，少一次 l = r 时的对比，且退出循环时 l & r 值相等。
+
+但需要注意的是此时寻找左/右边界的二分搜索，代表的是若将 target 元素放入序列中，并仍然保持序列有序情况下，target 元素**应处于**的位置。而闭区间的实现返回的是目标元素**出现**的位置。
+
+1. bisect left
+
+```js
+function binarySearch(arr, target) {
+  let l = 0,
+    r = arr.length;
+  while (l < r) {
+    let mid = l + Math.floor((r - l) / 2);
+    if (arr[mid] >= target) {
+      r = mid;
+    } else {
+      l = mid + 1;
+    }
+  }
+  return l;
+}
+```
+
+2. bisect right
+
+```js
+function binarySearch(arr, target) {
+  let l = 0,
+    r = arr.length;
+  while (l < r) {
+    let mid = Math.floor((l + r) / 2);
+    if (arr[mid] > target) {
+      r = mid;
+    } else {
+      l = mid + 1;
+    }
+  }
+  return l;
+}
+```
 
 [ref](https://github.com/yangshun/lago/blob/master/src/algorithms/binarySearch.ts)
 
@@ -143,7 +187,7 @@ var isPerfectSquare = function (num) {
 };
 ```
 
-思考：[] 更合适还是 [) 更合适？
+前闭后开
 
 ```js
 var isPerfectSquare = function (num) {
@@ -186,21 +230,20 @@ var mySqrt = function (x) {
 ```
 
 ```js
-var mySqrt = function (x) {
+function sqrt(num) {
   let l = 1,
-    r = x;
+    r = num;
   while (l < r) {
-    let mid = l + Math.floor((r - l) / 2),
+    let mid = Math.floor((l + r) / 2),
       prod = mid * mid;
-    if (prod === x) return mid;
-    else if (prod < x) {
+    if (prod < num) {
       l = mid + 1;
     } else {
       r = mid;
     }
   }
-  return l * l <= x ? l : l - 1;
-};
+  return l * l <= num ? l : l - 1;
+}
 ```
 
 ### [First Bad Version](https://leetcode.com/problems/first-bad-version/)
@@ -213,13 +256,13 @@ var solution = function (isBadVersion) {
    * @param {integer} n Total versions
    * @return {integer} The first bad version
    */
-  return function (n) {
+  return function find(n) {
     let l = 1,
       r = n;
-    while (l <= r) {
-      let mid = l + Math.floor((r - l) / 2);
+    while (l < r) {
+      let mid = Math.floor((l + r) / 2);
       if (isBadVersion(mid)) {
-        r = mid - 1;
+        r = mid;
       } else {
         l = mid + 1;
       }
@@ -237,18 +280,17 @@ Given a sorted list of n-1 integers and these integers are in the range of 1 to 
 
 ```js
 function findMissingElement(arr) {
-  let left = 0,
-    right = arr.length - 1;
-  while (left <= right) {
-    let mid = left + Math.floor((right - left) / 2);
-    if (arr[mid] - 1 !== mid) {
-      right = mid - 1;
+  let l = 0,
+    r = arr.length;
+  while (l < r) {
+    let mid = Math.floor((l + r) / 2);
+    if (arr[mid] !== mid + 1) {
+      r = mid;
     } else {
-      left = mid + 1;
+      l = mid + 1;
     }
   }
-
-  return left + 1;
+  return l + 1;
 }
 ```
 
@@ -274,7 +316,25 @@ var peakIndexInMountainArray = function (arr) {
 };
 ```
 
-Note: 最右侧也可以，题目没要求。
+Note: 或者找 arr[mid - 1] < arr[mid] 区间的最右侧也可以。
+
+```js
+function peakIndexInMountainArray(arr) {
+  let l = 0,
+    r = arr.length;
+  while (l < r) {
+    let mid = Math.floor((l + r) / 2);
+    let prev = mid - 1 >= 0 ? arr[mid - 1] : -Infinity;
+    if (arr[mid] > prev) {
+      l = mid + 1;
+    } else {
+      r = mid;
+    }
+  }
+
+  return l - 1;
+}
+```
 
 ### [Find Peak Element](https://leetcode.com/problems/find-peak-element/)
 
@@ -305,33 +365,31 @@ var findPeakElement = function (arr) {
 通过 leftBound 和 rightBound 分别找到左右边界。=> 优化：第二次搜索找右边界时，范围区间是 [left, nums.length - 1]。
 
 ```js
-var searchRange = function (arr, target) {
-  let left = 0,
-    right = arr.length - 1,
+function searchRange(arr, target) {
+  let l = 0,
+    r = arr.length,
     res = [];
-  while (left <= right) {
-    let mid = Math.floor((right + left) / 2);
-    if (arr[mid] < target) {
-      left = mid + 1;
+  while (l < r) {
+    let mid = Math.floor((l + r) / 2);
+    if (arr[mid] >= target) {
+      r = mid;
     } else {
-      right = mid - 1;
+      l = mid + 1;
     }
   }
-  res[0] = left < arr.length && arr[left] === target ? left : -1;
-
-  right = arr.length - 1;
-  while (left <= right) {
-    let mid = Math.floor((right + left) / 2);
-    if (arr[mid] > target) {
-      right = mid - 1;
+  res[0] = l;
+  r = arr.length;
+  while (l < r) {
+    let mid = Math.floor((r + l) / 2);
+    if (arr[mid] <= target) {
+      l = mid + 1;
     } else {
-      left = mid + 1;
+      r = mid;
     }
   }
-  res[1] = right >= 0 && arr[right] === target ? right : -1;
-
-  return res;
-};
+  res[1] = r - 1;
+  return res[0] <= res[1] ? res : [-1,-1];
+}
 ```
 
 ### [Find Minimum in Rotated Sorted Array](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/)
