@@ -21,7 +21,9 @@ var twoSum = function (numbers, target) {
 
 Given an array nums of integers and integer K, return the maximum s such that there exists i < j with A[i] + A[j] < K. If no such pair exists, return -1.
 
-1. 暴力求解。O(n^2)。2) 先排序，后左右向中间靠拢。
+1. 暴力求解。O(n^2)。
+
+2. 先排序，后左右向中间靠拢。
 
 ```js
 function twoSumLessThanK(nums, k) {
@@ -39,6 +41,40 @@ function twoSumLessThanK(nums, k) {
   }
   return max;
 }
+```
+
+### [3Sum](https://leetcode.com/problems/3sum/)
+
+dfs combination sum => TLE
+
+based on Two Sum & early exit.
+
+```js
+var threeSum = function (nums) {
+  nums.sort((a, b) => a - b);
+  let res = [];
+  for (let i = 0; i < nums.length - 2 && nums[i] <= 0; i++) {
+    if (i === 0 || (i > 0 && nums[i] !== nums[i - 1])) {
+      let lo = i + 1,
+        hi = nums.length - 1,
+        sum = -nums[i];
+      while (lo < hi) {
+        if (nums[lo] + nums[hi] === sum) {
+          res.push([nums[i], nums[lo], nums[hi]]);
+          while (lo < hi && nums[lo] === nums[lo + 1]) lo++;
+          while (lo < hi && nums[hi] === nums[hi + 1]) hi++;
+          lo++;
+          hi--;
+        } else if (nums[lo] + nums[hi] > sum) {
+          hi--;
+        } else {
+          lo++;
+        }
+      }
+    }
+  }
+  return res;
+};
 ```
 
 ### [Move Zeroes](https://leetcode.com/problems/move-zeroes/)

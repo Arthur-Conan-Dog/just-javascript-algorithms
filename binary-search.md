@@ -4,7 +4,7 @@
 
 - 有序区间，找到某个符合条件的元素 / 符合条件的区间的左右边界。
 
-- 寻找边界：满足某种条件时收缩区间哪一侧？找左边界 => 收缩右侧。
+- 寻找边界：找左边界 => 严格不满足时收缩左侧。
 
 - 实现前需要明确区间形式是 [] 还是 [)。
 
@@ -296,7 +296,7 @@ function findMissingElement(arr) {
 
 ### [Peak Index in a Mountain Array](https://leetcode.com/problems/peak-index-in-a-mountain-array/)
 
-guaranteed exists.
+guaranteed only one peak exists.
 
 找到满足 arr[mid] > arr[mid + 1] 区间的最左侧。
 
@@ -338,7 +338,7 @@ function peakIndexInMountainArray(arr) {
 
 ### [Find Peak Element](https://leetcode.com/problems/find-peak-element/)
 
-同上题。
+If the array contains multiple peaks, return the index to any of the peaks.
 
 找到满足 arr[mid] > arr[mid + 1] 区间的最左侧。
 
@@ -350,7 +350,7 @@ var findPeakElement = function (arr) {
     let mid = Math.floor((r + l) / 2),
       next = mid + 1 < arr.length ? arr[mid + 1] : -Infinity;
     if (arr[mid] < next) {
-      l = mid + 1; // [l, mid] is going up
+      l = mid + 1; // 严格不满足
     } else {
       // [mid, r) is going down
       r = mid;
@@ -388,13 +388,39 @@ function searchRange(arr, target) {
     }
   }
   res[1] = r - 1;
-  return res[0] <= res[1] ? res : [-1,-1];
+  return res[0] <= res[1] ? res : [-1, -1];
 }
 ```
 
 ### [Find Minimum in Rotated Sorted Array](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/)
 
-思路一：通过判断 nums[mid] < nums[0] && nums[mid] < nums[nums.length - 1] 来缩小范围。
+_Note: 一开始试图用 find peak element 类似的思路求解，但不太合适。因为 find peak element 中可能存在多个满足条件区间，而题目只要求返回任意一个。本题同样可能存在多（两）个符合条件区间，虽然也可以处理，但感觉比较繁琐。需要想别的约束条件。_
+
+思路一 (recommend)：寻找满足元素小于最右侧数区间的最左边界。
+
+```js
+function findMin(nums) {
+  let l = 0,
+    r = nums.length;
+  while (l < r) {
+    let mid = Math.floor((l + r) / 2);
+    if (nums[mid] > nums[nums.length - 1]) {
+      l = mid + 1;
+    } else {
+      r = mid;
+    }
+  }
+  return nums[l];
+}
+```
+
+对于 [4,5,1,2,3] 的理想情况：如果 mid 在 [left, min) 内，按照题目定义，这个区间内的数值一定都大于 nums[nums.length-1]，left => target 靠近。如果 mid 在 [min, right) 内，则不符合条件，right = mid。while 的终止条件是 l < r，所以即使 right = min 也并没有问题，left 会继续移动至 min 的位置。最终 left = right，跳出循环。
+
+对于 [1,2,3,4] 的情况：mid 一定不满足值大于最右端元素的条件。故，right 会持续减少至与 left 相等。
+
+对于 [4,3,2,1] 的情况：mid 一直满足值大于最右端元素的条件，直到 mid = nums.length - 1，然后由于不满足条件，r = nums.length - 1，l = r，推出循环。
+
+思路二：通过判断 nums[mid] < nums[0] && nums[mid] < nums[nums.length - 1] 来缩小范围。
 
 ```js
 var findMin = function (nums) {
@@ -424,29 +450,6 @@ var findMin = function (nums) {
 对于 [4,3,2,1] 的情况：与上同。
 
 如何解决 edge case：打补丁。
-
-思路二 (recommend)：通过判断 nums[mid] > nums[r] 来缩小范围。
-
-```js
-var findMin = function (nums) {
-  let l = 0,
-    r = nums.length - 1;
-  while (l < r) {
-    const m = Math.floor((l + r) / 2);
-    if (nums[m] > nums[r]) l = m + 1;
-    else r = m;
-  }
-  return nums[l];
-};
-```
-
-由于判断条件为 nums[m] > nums[r]，故 r 必须在 [0, length - 1] 范围内。
-
-对于 [4,5,1,2,3] 的理想情况：如果 mid 在 [left, min) 内，按照题目定义，这个区间内的数值一定都大于 nums[right]，left => target 靠近。如果 mid 在 [min, right) 内，则不符合条件，right = mid。while 的终止条件是 l < r，所以即使 right = min 也并没有问题，left 会继续移动至 min 的位置。最终 left = right，跳出循环。
-
-对于 [1,2,3,4] 的情况：mid 一定不满足值大于最右端元素的条件。故，right 会持续减少至与 left 相等。
-
-对于 [4,3,2,1] 的情况：mid 一直满足值大于最右端元素的条件。故，left 会持续增加至与 right = length - 1 相等。
 
 ### [Find Minimum in Rotated Sorted Array II](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii/)
 
@@ -483,6 +486,8 @@ var findMin = function (nums) {
   return nums[l];
 };
 ```
+
+Note: 因为重复元素的存在，需要修正右边界，所以 nums[nums.length-1] 变成用 nums[r]，r 初始化为 nums.length - 1。对于前闭后开的二分搜索来说其实 nums.length / nums.length - 1 没什么区别。
 
 ### [Search in Rotated Sorted Array](https://leetcode.com/problems/search-in-rotated-sorted-array/)
 
@@ -678,29 +683,26 @@ O(N^2) => O(N\*logN)
 用 matrix 首尾元素的值作为左右边界。
 
 ```js
-var kthSmallest = function (matrix, k) {
-  let n = matrix.length;
-  let l = matrix[0][0],
+function kthSmallest(matrix, k) {
+  let n = matrix.length,
+    l = matrix[0][0],
     r = matrix[n - 1][n - 1];
-  let mid,
-    count = 0;
-
   while (l < r) {
-    mid = l + Math.floor((r - l) / 2);
-    count = 0;
-
+    let mid = Math.floor((l + r) / 2),
+      count = 0;
     matrix.forEach((row) => {
       let j = 0;
       while (j < n && row[j] <= mid) j++;
       count += j;
     });
-
-    if (count < k) l = mid + 1;
-    else r = mid;
+    if (count < k) {
+      l = mid + 1;
+    } else {
+      r = mid;
+    }
   }
-
   return l;
-};
+}
 ```
 
 ### [Single Element in a Sorted Array](https://leetcode.com/problems/single-element-in-a-sorted-array/)
@@ -754,64 +756,5 @@ var findBestValue = function (arr, target) {
   let b = arr.reduce(calc(l - 1), 0);
 
   return Math.abs(a - target) < Math.abs(b - target) ? l : l - 1;
-};
-```
-
-### [3Sum](https://leetcode.com/problems/3sum/)
-
-dfs => TLE
-
-```js
-var threeSum = function (nums) {
-  nums.sort((a, b) => a - b);
-  let res = [];
-  const dfs = (idx, curr, sum) => {
-    if (sum === 0 && curr.length === 3) {
-      res.push(curr.concat());
-      return;
-    }
-    if (curr.length === 3) return;
-    for (let i = idx; i < nums.length; i++) {
-      curr.push(nums[i]);
-      dfs(i + 1, curr, sum + nums[i]);
-      curr.pop();
-      while (i < nums.length - 1 && nums[i] == nums[i + 1]) {
-        // skip duplicates
-        i++;
-      }
-    }
-  };
-  dfs(0, [], 0);
-  return res;
-};
-```
-
-binary search
-
-```js
-var threeSum = function (nums) {
-  nums.sort((a, b) => a - b);
-  let res = [];
-  for (let i = 0; i < nums.length - 2 && nums[i] <= 0; i++) {
-    if (i === 0 || (i > 0 && nums[i] !== nums[i - 1])) {
-      let lo = i + 1,
-        hi = nums.length - 1,
-        sum = -nums[i];
-      while (lo < hi) {
-        if (nums[lo] + nums[hi] === sum) {
-          res.push([nums[i], nums[lo], nums[hi]]);
-          while (lo < hi && nums[lo] === nums[lo + 1]) lo++;
-          while (lo < hi && nums[hi] === nums[hi + 1]) hi++;
-          lo++;
-          hi--;
-        } else if (nums[lo] + nums[hi] > sum) {
-          hi--;
-        } else {
-          lo++;
-        }
-      }
-    }
-  }
-  return res;
 };
 ```
