@@ -323,6 +323,30 @@ var productExceptSelf = function (nums) {
 };
 ```
 
+### [Ugly Number II](https://leetcode.com/problems/ugly-number-ii/)
+
+An ugly number is a positive integer whose prime factors are limited to 2, 3, and 5. Given an integer n, return the nth ugly number. Note that 1 is always the first ugly number.
+
+```js
+var nthUglyNumber = function (n) {
+  let ugly = [1],
+    f2 = 2,
+    f3 = 3,
+    f5 = 5,
+    idx2 = 0,
+    idx3 = 0,
+    idx5 = 0;
+  for (let i = 1; i < n; i++) {
+    let min = Math.min(f2, f3, f5);
+    ugly[i] = min;
+    if (f2 === min) f2 = 2 * ugly[++idx2];
+    if (f3 === min) f3 = 3 * ugly[++idx3];
+    if (f5 === min) f5 = 5 * ugly[++idx5];
+  }
+  return ugly[n - 1];
+};
+```
+
 ### Prefix Sum
 
 i = 0: nums[0], sum[0] = nums[0]
@@ -884,10 +908,14 @@ O(n^2)
 
 ```js
 function maximumSwap(num) {
-  let arr = num.toString().split('').map(ch => Number.parseInt(ch));
+  let arr = num
+    .toString()
+    .split("")
+    .map((ch) => Number.parseInt(ch));
 
   for (let i = 0; i < arr.length; i++) {
-    let j = i, max = i;
+    let j = i,
+      max = i;
     while (j < arr.length) {
       if (arr[max] <= arr[j]) max = j;
       j++;
