@@ -400,27 +400,27 @@ var buildTree = function (inorder, postorder) {
 
 [Preorder + Postorder](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-postorder-traversal/)
 
-[idea](<https://leetcode.com/problems/construct-binary-tree-from-preorder-and-postorder-traversal/discuss/161268/C%2B%2BJavaPython-One-Pass-Real-O(N)>): take [1,2,3,null,4,5] as example, pre: [1,2,4,3,5], post: [4,2,5,3,1], res: [1,2,3,4,null,5]. 只要 pre 没有跟 post 产生交集，就一直递增 preIdx，并且填充节点，如果有交集则返回上层，并后移 postIdx。
+[idea](<https://leetcode.com/problems/construct-binary-tree-from-preorder-and-postorder-traversal/discuss/161268/C%2B%2BJavaPython-One-Pass-Real-O(N)>): take [1,2,3,null,4,5] as example, pre: [1,2,4,3,5], post: [4,2,5,3,1], res: [1,2,3,4,null,5]. 只要 preIdx 没有跟 postIdx 所指向的节点不同，就一直递增 preIdx，并且填充节点，如果有交集则后移 postIdx，返回上层。
 
 recursion:
 
 ```js
-var constructFromPrePost = function (pre, post) {
+function constructFromPrePost(pre, post) {
   let preIdx = 0,
     postIdx = 0;
-  const helper = (pre, post) => {
+  const helper = () => {
     let root = new TreeNode(pre[preIdx++]);
     if (root.val !== post[postIdx]) {
-      root.left = helper(pre, post);
+      root.left = helper();
     }
     if (root.val !== post[postIdx]) {
-      root.right = helper(pre, post);
+      root.right = helper();
     }
     postIdx++;
     return root;
   };
-  return helper(pre, post);
-};
+  return helper();
+}
 ```
 
 iteration:
@@ -454,9 +454,10 @@ In-order traversal of a BST will give you all elements in order. When a question
 ```js
 var searchBST = function (root, val) {
   if (!root) return null;
-  if (val < root.val) return searchBST(root.left, val);
-  if (val > root.val) return searchBST(root.right, val);
-  return root;
+  if (root.val === val) return root;
+  return root.val < val
+    ? searchBST(root.left, val)
+    : searchBST(root.right, val);
 };
 ```
 
@@ -514,14 +515,16 @@ var isValidBST = function (root) {
 思路二（改进）：约束当前子树不能超过的最小值和最大值 => 向左子树递归，则当前节点值为新的 max；向右子树递归，则当前节点值为新的 min。
 
 ```js
-var isValidBST = function (root) {
+function isValidBST(root) {
   function helper(node, min, max) {
     if (!node) return true;
-    if (node.val <= min.val || node.val >= max.val) return false;
-    return helper(node.left, min, node) && helper(node.right, node, max);
+    if (node.val <= min || node.val >= max) return false;
+    return (
+      helper(node.left, min, node.val) && helper(node.right, node.val, max)
+    );
   }
-  return helper(root, Infinity, -Infinity);
-};
+  return helper(root, -Infinity, Infinity);
+}
 ```
 
 ### [Trie](https://leetcode.com/explore/learn/card/trie/)
@@ -714,13 +717,12 @@ var zigzagLevelOrder = function (root) {
 
 ```js
 var isCompleteTree = function (root) {
+  if (!root) return true;
   let q = [root];
   while (q.length > 0) {
     let node = q.shift();
     while (!node && q.length) {
-      if (q.shift()) {
-        return false;
-      }
+      if (q.shift()) return false;
     }
     if (node) {
       q.push(node.left);
@@ -733,9 +735,7 @@ var isCompleteTree = function (root) {
 
 #### [Maximum Width of Binary Tree](https://leetcode.com/problems/maximum-width-of-binary-tree/)
 
-一开始想通过把所有子节点都放进下一层来算最大，但 too naive，[1,3,2,5] 这种情况会不满足。由这个 case 想到，需要记录每一层首个和末个节点的位置。
-
-为什么不用 2\*pos & 2\*pos+1 这种正向 idx 来记录？会溢出。
+记录每一层首个和末个节点的位置。
 
 ```js
 var widthOfBinaryTree = function (root) {
@@ -755,6 +755,8 @@ var widthOfBinaryTree = function (root) {
   return max;
 };
 ```
+
+**Note: 为什么不用 2\*pos & 2\*pos+1 的正向 idx 来记录？=> 会溢出。**
 
 #### [Boundary of Binary Tree](https://github.com/grandyang/leetcode/issues/545)
 
@@ -804,9 +806,9 @@ function rightBoundary(root, res) {
 
 可能的技巧：通过特殊返回值表示结果；若递归过程是求最值过程，最值需要在计算的同时被不断比较更新。
 
-TODO：分类如 Subtree of Another Tree。以及这样写的时间复杂度。
-
 #### [Cousins in Binary Tree](https://leetcode.com/problems/cousins-in-binary-tree/)
+
+Two nodes of a binary tree are cousins if they have the same depth, but have different parents. Return true if and only if the nodes corresponding to the values x and y are cousins.
 
 ```js
 var isCousins = function (root, x, y) {
@@ -826,6 +828,8 @@ function find(root, x, depth, parent) {
 
 #### [Maximum Depth of Binary Tree](https://leetcode.com/problems/maximum-depth-of-binary-tree/)
 
+Given the root of a binary tree, return its maximum depth.
+
 ```js
 var maxDepth = function (root) {
   if (!root) return 0;
@@ -834,6 +838,10 @@ var maxDepth = function (root) {
 ```
 
 #### [Minimum Depth of Binary Tree](https://leetcode.com/problems/minimum-depth-of-binary-tree/)
+
+Given a binary tree, find its minimum depth.
+
+考虑 base case；考虑左右子树的最小深度结果已通过递归得到，当前节点对应的结果应如何求？
 
 ```js
 var minDepth = function (root) {
@@ -846,9 +854,11 @@ var minDepth = function (root) {
 
 #### [Balanced Binary Tree](https://leetcode.com/problems/balanced-binary-tree/)
 
-需要递归计算出左右子树的深度，并返回给上层，同时上层需要递归结果来比较得到当前节点所对应的子树是否满足 balanced 条件。一种做法是通过“全局变量”，helper 在递归时不断修改这个变量；另一种做法是，通过特殊返回值规避“全局变量”。
+Given a binary tree, determine if it is height-balanced (a binary tree in which the left and right subtrees of every node differ in height by no more than 1).
 
-由于只计算左右子树深度，递归结果只可能 >= 0，那么在递归的过程中一旦发现不符合条件的情况，可以通过返回特殊值 -1 表示当前结果不符合 balanced 条件，让递归提前结束。
+需要通过递归得到的值：深度 & 是否满足 height-balanced。=> 两个变量记录，递归返回 tuple。
+
+优化：使用特殊值代表后者。由于只计算左右子树深度，递归结果只可能 >= 0，那么在递归的过程中一旦发现不符合条件的情况，可以通过返回特殊值 -1 表示当前结果不符合 balanced 条件，让递归提前结束。
 
 ```js
 var isBalanced = function (root) {
@@ -866,6 +876,10 @@ function helper(root) {
 ```
 
 #### [Symmetric Tree](https://leetcode.com/problems/symmetric-tree/)
+
+Given the root of a binary tree, check whether it is a mirror of itself (i.e., symmetric around its center).
+
+compare root.left.left with root.right.right, and root.left.right with root.right.left. isSymmetric 不能作为递归函数，因为左子树对称和右子树对称的结果无法推出当前节点所代表的树是镜像对称的。=> 需要一个新的函数同时向左右子树递归。
 
 recursion
 
@@ -907,6 +921,8 @@ var isSymmetric = function (root) {
 
 The path can be either increasing or decreasing, and the path can be in the child-Parent-child order.
 
+可能的情况：1) 路径经过当前节点。2) 路径不经过当前节点。两种情况中的较大值就是最长连续路径。
+
 ```js
 function longestConsecutive(root) {
   if (!root) return 0;
@@ -934,7 +950,7 @@ const dfs = (root, diff) => {
 
 #### [Binary Tree Longest Consecutive Sequence](https://github.com/grandyang/leetcode/issues/298)
 
-比较容易想到的递归方式同上题，但会造成重复的递归计算。可以在递归时传递 parent 节点，帮助判断当前路径是否要延续。
+递归时传递 parent 节点，current sum & max sum。
 
 ```js
 function longestConsecutive(root) {
@@ -964,32 +980,6 @@ var hasPathSum = function (root, sum) {
 };
 ```
 
-#### [Path Sum II](https://leetcode.com/problems/path-sum-ii/)
-
-return all root-to-leaf paths where each path's sum equals targetSum.
-
-在递归之路上，除当前 sum 外，还需要额外记录的信息：所有路径合法的集合 paths，以及当前路径 path。当最终抵达叶子结点时，判断当前路径是否为合法路径，若是则将当前路径 path 加入合法路径集合 paths。
-
-```js
-var pathSum = function (root, sum) {
-  let paths = [];
-  findPath(root, sum, paths, []);
-  return paths;
-};
-
-function findPath(root, sum, paths, path) {
-  if (!root) return;
-
-  path.push(root.val);
-  if (!root.left && !root.right && root.val === sum) {
-    paths.push(path.concat());
-  }
-  findPath(root.left, sum - root.val, paths, path);
-  findPath(root.right, sum - root.val, paths, path);
-  path.pop();
-}
-```
-
 #### [Path Sum III](https://leetcode.com/problems/path-sum-iii/)
 
 Find the number of paths that sum to a given value. The path does not need to start or end at the root or a leaf, but it must travel only from parent nodes to child nodes.
@@ -1013,6 +1003,50 @@ var pathSumFrom = function (root, sum) {
   );
 };
 ```
+
+#### [Subtree of Another Tree](https://leetcode.com/problems/subtree-of-another-tree/)
+
+```js
+var isSubtree = function (s, t) {
+  if (!s) return false;
+  return isSame(s, t) || isSubtree(s.left, t) || isSubtree(s.right, t);
+};
+
+function isSame(s, t) {
+  if (!s && !t) return true;
+  if (!s || !t) return false;
+  return s.val === t.val && isSame(s.left, t.left) && isSame(s.right, t.right);
+}
+```
+
+If assume m is the number of nodes in the 1st tree and n is the number of nodes in the 2nd tree, then:
+
+Time complexity: O(m\*n), worst case: for each node in the 1st tree, we need to check if isSame(Node s, Node t). Total m nodes, isSame(...) takes O(n) worst case
+
+Space complexity: If the tree is balanced, your recursion would be the depth of each subtree, thus Height == logm. If the tree is skewed, then height would be m. O(height of 1str tree)(Or you can say: O(m) for worst case, O(logm) for average case)
+
+#### [Linked List in Binary Tree](https://leetcode.com/problems/linked-list-in-binary-tree/)
+
+```js
+var isSubPath = function (head, root) {
+  if (!head) return true;
+  if (!root) return false;
+  return (
+    isSubPathFrom(head, root) || isSubPath(head, root.left) || isSubPath(head, root.right)
+  );
+};
+
+function isSubPathFrom(head, root) {
+  if (!head) return true;
+  if (!root) return false;
+  return (
+    head.val === root.val &&
+    (isSubPathFrom(head.next, root.left) || isSubPathFrom(head.next, root.right))
+  );
+}
+```
+
+Time O(N \* min(L,H)), Space O(H), where N = tree size, H = tree height, L = list length.
 
 #### [Diameter of Binary Tree](https://leetcode.com/problems/diameter-of-binary-tree/)
 
@@ -1040,7 +1074,7 @@ var diameterOfBinaryTree = function (root) {
 return the maximum path sum of any path. Note that the path does not need to pass through the root.
 
 ```js
-const MIN = -2147483648; // strange min value LT uses
+const MIN = -2147483648; // min value LT uses
 var maxPathSum = function (root) {
   if (!root) return MIN;
   let max = MIN;
@@ -1056,31 +1090,9 @@ var maxPathSum = function (root) {
 };
 ```
 
-复盘思考过程：想到结合之前做的递归题目（如 Path Sum III），先简化问题为：求单边树的 maxPathSum，然后分别处理，于是想当然地写出了：
-
-```js
-function maxPathSumFrom(root) {
-  if (!root) return 0;
-  let left = Math.max(0, maxPathSumFrom(root.left)), // => wrong recursion abstraction
-    right = Math.max(0, maxPathSumFrom(root.right));
-  return Math.max(left, right) + root.val;
-}
-
-var maxPathSum = function (root) {
-  if (!root) return -2147483648;
-  return Math.max(
-    maxPathSumFrom(root),
-    maxPathSum(root.left),
-    maxPathSum(root.right)
-  );
-};
-```
-
-但输入 [-10,9,20,null,null,15,7]，expected = 42，output = 35。
-
-原因是递归的返回其实只能代表一种情况：root 的值被用于当前路径中，且为路径末端。而 root 作为路径中的节点这种情况则被忽略了，即 left + right + val。这种情况其实可以在递归得到 root as end，go left / right 的过程中处理。
-
 #### [Delete Nodes And Return Forest](https://leetcode.com/problems/delete-nodes-and-return-forest/)
+
+After deleting all nodes with a value in to_delete, we are left with a forest (a disjoint union of trees). Return the roots of the trees in the remaining forest. You may return the result in any order.
 
 应该判断当前节点 node 的子节点 left & right 的值在 to_delete 中，还是判断当前节点的值在其中？=> 当前节点。如果判断子节点，那么就需要处理将当前节点与子节点的节点进行连接的情况，复杂化解决方案。=> 如果判断当前节点，那么必然应先递归处理好子节点。
 
@@ -1154,28 +1166,6 @@ var pruneTree = function (root) {
 };
 ```
 
-#### [Subtree of Another Tree](https://leetcode.com/problems/subtree-of-another-tree/)
-
-```js
-var isSubtree = function (s, t) {
-  if (!s) return false;
-  return isSame(s, t) || isSubtree(s.left, t) || isSubtree(s.right, t);
-};
-
-function isSame(s, t) {
-  if (!s && !t) return true;
-  if (!s || !t) return false;
-  return s.val === t.val && isSame(s.left, t.left) && isSame(s.right, t.right);
-}
-```
-
-If assume m is the number of nodes in the 1st tree and n is the number of nodes in the 2nd tree, then:
-
-Time complexity: O(m*n), worst case: for each node in the 1st tree, we need to check if isSame(Node s, Node t). Total m nodes, isSame(...) takes O(n) worst case
-
-Space complexity: Basically you would try to compare the the target tree with each subtree in the source tree - the root for each subtree will be picked in a preorder manner (total of m root nodes). So the worst possibility is that you travel each subtree and find out the last node is different (total of n nodes compared). If the tree is balanced, your recursion would be the depth of each subtree, thus Height == logm. If the tree is skewed, then height would be m. O(height of 1str tree)(Or you can say: O(m) for worst case, O(logm) for average case)
-
-
 #### [Merge Two Binary Trees](https://leetcode.com/problems/merge-two-binary-trees/)
 
 ```js
@@ -1210,38 +1200,13 @@ var sumNumbers = function (root) {
 };
 ```
 
-#### [Linked List in Binary Tree](https://leetcode.com/problems/linked-list-in-binary-tree/)
-
-Time O(N \* min(L,H))
-Space O(H)
-where N = tree size, H = tree height, L = list length.
-
-```js
-function dfs(head, root) {
-  if (head === null) return true;
-  if (root === null) return false;
-  return (
-    head.val === root.val &&
-    (dfs(head.next, root.left) || dfs(head.next, root.right))
-  );
-}
-
-var isSubPath = function (head, root) {
-  if (head === null) return true;
-  if (root === null) return false;
-  return (
-    dfs(head, root) || isSubPath(head, root.left) || isSubPath(head, root.right)
-  );
-};
-```
-
 #### [Lowest Common Ancestor of a Binary Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/)
 
-通常情况：p q 一个在左子树，一个在右子树，那么从当前节点向左子树和右子树递归，当两边递归的返回值都存在时，说明当前节点就是祖先节点。
+- 若 p q 一个在左子树，一个在右子树，那么从当前节点向左子树和右子树递归，当两边递归的返回值都存在时，说明当前节点就是祖先节点。
 
-通常情况：p q 都在左子树或者都在右子树。如果目标节点在某一侧，另一侧应返回 null，加一个判断来处理这种情况。
+- 若 p q 都在左子树或者都在右子树。如果目标节点在某一侧，另一侧应返回 null，加一个判断来处理这种情况。
 
-特殊情况，p 或者 q 其中一个就是祖先节点。因为 p q 一定存在于树中，那么如果当前节点等于 p 或者 q 时，意味着祖先节点已经找到，不必再查找直接返回该节点即可。
+- 若 p q 其中一个就是祖先节点。因为 p q 一定存在于树中，那么如果当前节点等于 p 或者 q 时，意味着祖先节点已经找到，不必再查找直接返回该节点即可。
 
 ```js
 var lowestCommonAncestor = function (root, p, q) {
@@ -1254,13 +1219,6 @@ var lowestCommonAncestor = function (root, p, q) {
   return l ? l : r;
 };
 ```
-
-TODO: LCA of BT 后续系列
-
-https://leetcode.com/problems/smallest-common-region/
-https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree-ii/
-https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree-iii/
-https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree-iv/
 
 #### [House Robber III](https://leetcode.com/problems/house-robber-iii/)
 
@@ -1285,7 +1243,7 @@ var rob = function (root) {
 ```js
 var rob = function (root) {
   function robAt(node) {
-    if (!node) return [0, 0];
+    if (!node) return [0, 0]; // [max value if rob current node, max value if not rot current node]
     let l = robAt(node.left),
       r = robAt(node.right);
     return [
@@ -1302,7 +1260,9 @@ var rob = function (root) {
 
 #### [Maximum Sum BST in Binary Tree](https://leetcode.com/problems/maximum-sum-bst-in-binary-tree/)
 
-与 validate BST 不同，需要从下向上求解。null 节点返回值应如何处理可以让上一层的叶子节点满足 `left.isValid && right.isValid && left.max < node.val && right.min > node.val`？
+Given a binary tree root, the task is to return the maximum sum of all keys of any sub-tree which is also a Binary Search Tree (BST).
+
+null 节点应返回什么值，使得上一层的叶子节点可以满足 `left.isValid && right.isValid && left.max < node.val && right.min > node.val`？
 
 ```js
 class NodeInfo {
@@ -1357,6 +1317,8 @@ var lowestCommonAncestor = function (root, p, q) {
 
 #### [Trim a Binary Search Tree](https://leetcode.com/problems/trim-a-binary-search-tree/)
 
+Given the root of a binary search tree and the lowest and highest boundaries as low and high, trim the tree so that all its elements lies in [low, high].
+
 ```js
 var trimBST = function (root, low, high) {
   if (!root) return null;
@@ -1373,15 +1335,14 @@ var trimBST = function (root, low, high) {
 
 #### [Range Sum of BST](https://leetcode.com/problems/range-sum-of-bst/)
 
+Given the root node of a binary search tree, return the sum of values of all nodes with a value in the range [low, high].
+
 ```js
 var rangeSumBST = function (root, low, high) {
   if (!root) return 0;
-  if (root.val < low) {
-    return rangeSumBST(root.right, low, high);
-  }
-  if (root.val > high) {
-    return rangeSumBST(root.left, low, high);
-  }
+  if (root.val < low) return rangeSumBST(root.right, low, high);
+  if (root.val > high) return rangeSumBST(root.left, low, high);
+
   return (
     root.val +
     rangeSumBST(root.left, low, high) +
@@ -1391,6 +1352,10 @@ var rangeSumBST = function (root, low, high) {
 ```
 
 #### [Closest Binary Search Tree Value](https://github.com/grandyang/leetcode/issues/270)
+
+Given a non-empty binary search tree and a target value, find the value in the BST that is closest to the target.
+
+Note: Given target value is a floating point. You are guaranteed to have only one unique value in the BST that is closest to the target.
 
 ```js
 var closestValue = function (root, target) {
@@ -1497,6 +1462,8 @@ var bstToGst = function (root) {
 
 #### [Increasing Order Search Tree](https://leetcode.com/problems/increasing-order-search-tree/)
 
+Given the root of a binary search tree, rearrange the tree in in-order so that the leftmost node in the tree is now the root of the tree, and every node has no left child and only one right child.
+
 思路一：递归返回当前子树被更新后的根节点 => 可能存在的问题：该子树有右子树，上层节点应被重新链接至右子树的最右端叶子结点上。
 
 ```js
@@ -1535,8 +1502,6 @@ var increasingBST = function (root) {
 ```
 
 #### [Find Mode in Binary Search Tree](https://leetcode.com/problems/find-mode-in-binary-search-tree/)
-
-**caution!**
 
 要找到树中所有最频繁出现的 val => 需要遍历整个树 => in-order。
 
@@ -1689,7 +1654,7 @@ var findMode = function (root) {
 
 有两个节点进行了交换 => 从中序遍历的结果可以看出是哪两个节点 => 前一位的值大于后一位 => 需要 prev 指针标记前序节点
 
-交换可能存在的情况 => 无非是邻近交换，或者间隔交换，即：[1,2,3,4] => [2,1,3,4] 或者 [4,2,3,1]
+交换可能存在的情况 => 无非是邻近交换，或者间隔交换，如：[1,2,3,4] => [4,2,3,1] 或者 [2,1,3,4]
 
 => 还需要两个指针 first & second 标记需要交换的两个节点
 
@@ -1845,6 +1810,8 @@ convert to sorted array, and re-build. inorder + Convert Sorted Array to Binary 
 
 #### [Largest BST Subtree](https://github.com/grandyang/leetcode/issues/333)
 
+Given a binary tree, find the largest subtree which is a Binary Search Tree (BST), where largest means subtree with largest number of nodes in it. Note: A subtree must include all of its descendants.
+
 ```js
 function largestBSTSubtree(root) {
   if (!root) return 0;
@@ -1855,7 +1822,9 @@ function largestBSTSubtree(root) {
 function isValid(root, min, max) {
   if (!root) return true;
   if (root.val < min || root.val > max) return false;
-  return isValid(root.left, min, root.val) && isValid(root.right, root.val, max);
+  return (
+    isValid(root.left, min, root.val) && isValid(root.right, root.val, max)
+  );
 }
 
 function count(root) {
@@ -1874,7 +1843,8 @@ function largestBSTSubtree(root) {
 
 function helper(root) {
   if (!root) return new Meta(0, Infinity, -Infinity);
-  let left = helper(root.left), right = helper(root.right);
+  let left = helper(root.left),
+    right = helper(root.right);
   if (root.val > left.max && root.val < right.min) {
     return new Meta(left.count + right.count + 1, left.min, right.max);
   } else {
