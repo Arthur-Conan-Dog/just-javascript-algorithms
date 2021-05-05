@@ -795,3 +795,101 @@ function toIdx(num, n) {
   return [row, col]
 };
 ```
+
+### [Kill Process](https://github.com/grandyang/leetcode/issues/582)
+
+```js
+function killProcess(pid, ppid, kill) {
+  let res = [],
+    map = {};
+  for (let i = 0; i < pid.length; i++) {
+    if (!map[ppid[i]]) map[ppid[i]] = [];
+    map[ppid[i]].push(pid[i]);
+  }
+  let queue = [kill];
+  while (queue.length) {
+    let node = queue.shift();
+    res.push(node);
+    if (map[node]) {
+      for (let child of map[node]) {
+        queue.push(child);
+      }
+    }
+  }
+  return res;
+}
+```
+
+#### [All Nodes Distance K in Binary Tree](https://leetcode.com/problems/all-nodes-distance-k-in-binary-tree/)
+
+Return a list of the values of all nodes that have a distance K from the target node.
+
+构建邻接表，然后 BFS。
+
+```js
+var distanceK = function (root, target, K) {
+  let adjs = build(null, root);
+  let nodes = [target.val],
+    seen = new Set(nodes);
+  for (let i = 0; i < K; i++) {
+    let curr = [];
+    for (let node of nodes) {
+      if (!adjs[node]) continue;
+      for (let next of adjs[node]) {
+        if (!seen.has(next)) {
+          curr.push(next);
+          seen.add(next);
+        }
+      }
+    }
+    nodes = curr;
+  }
+  return nodes;
+};
+
+function build(parent, child, adjs = []) {
+  if (parent && child) {
+    if (!adjs[parent.val]) adjs[parent.val] = [];
+    if (!adjs[child.val]) adjs[child.val] = [];
+    adjs[parent.val].push(child.val);
+    adjs[child.val].push(parent.val); // child => parent 因为 BFS 时还需要从 target node 向上递归
+  }
+  if (child.left) build(child, child.left, adjs);
+  if (child.right) build(child, child.right, adjs);
+  return adjs;
+}
+```
+
+recursion: 会修改 node，添加 parent 指针。
+
+```js
+var distanceK = function (root, target, K) {
+  if (!root) return [];
+  const node = findTarget(root, null, target);
+  return findAllKApart(node, K);
+};
+
+function findTarget(root, parent, target) {
+  if (!root) return null;
+  root.parent = parent;
+  if (root === target) {
+    return root;
+  }
+  return (
+    findTarget(root.left, root, target) || findTarget(root.right, root, target)
+  );
+}
+
+function findAllKApart(root, k, res = [], seen = new Set()) {
+  if (!root || seen.has(root.val)) return res;
+  if (k == 0) {
+    res.push(root.val);
+    return res;
+  }
+  seen.add(root.val);
+  findAllKApart(root.left, k - 1, res, seen);
+  findAllKApart(root.right, k - 1, res, seen);
+  findAllKApart(root.parent, k - 1, res, seen);
+  return res;
+}
+```

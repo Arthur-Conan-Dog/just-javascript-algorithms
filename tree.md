@@ -1032,7 +1032,9 @@ var isSubPath = function (head, root) {
   if (!head) return true;
   if (!root) return false;
   return (
-    isSubPathFrom(head, root) || isSubPath(head, root.left) || isSubPath(head, root.right)
+    isSubPathFrom(head, root) ||
+    isSubPath(head, root.left) ||
+    isSubPath(head, root.right)
   );
 };
 
@@ -1041,7 +1043,8 @@ function isSubPathFrom(head, root) {
   if (!root) return false;
   return (
     head.val === root.val &&
-    (isSubPathFrom(head.next, root.left) || isSubPathFrom(head.next, root.right))
+    (isSubPathFrom(head.next, root.left) ||
+      isSubPathFrom(head.next, root.right))
   );
 }
 ```
@@ -1861,6 +1864,29 @@ class Meta {
 }
 ```
 
+#### [Split BST](https://github.com/grandyang/leetcode/issues/776)
+
+Given a Binary Search Tree (BST) with root node root, and a target value V, split the tree into two subtrees where one subtree has nodes that are all smaller or equal to the target value, while the other subtree has all nodes that are greater than the target value.  It's not necessarily the case that the tree contains a node with value V. Output the root TreeNode of both subtrees after splitting, in any order.
+
+res[0]: node.val <= v; res[1]: node.val > v.
+
+```js
+function splitBST(root, v) {
+  let res = [null, null];
+  if (!root) return res;
+  if (root.val <= v) {
+    res = splitBST(root.right, v);
+    root.right = res[0];
+    res[0] = root;
+  } else {
+    res = splitBST(root.left, v);
+    root.left = res[1];
+    res[1] = root;
+  }
+  return res;
+}
+```
+
 ### Trie
 
 #### [Map Sum Pairs](https://leetcode.com/problems/map-sum-pairs/)
@@ -2015,6 +2041,17 @@ function bfs(root, word) {
 #### [Word Search II](https://leetcode.com/problems/word-search-ii/)
 
 ```js
+var findWords = function (board, words) {
+  let res = [],
+    dic = buildTrie(words);
+  for (let i = 0; i < board.length; i++) {
+    for (let j = 0; j < board[0].length; j++) {
+      dfs(board, i, j, dic, res);
+    }
+  }
+  return res;
+};
+
 function dfs(board, i, j, node, res) {
   let ch = board[i][j],
     placeholder = "*";
@@ -2051,17 +2088,6 @@ function buildTrie(words) {
   }
   return root;
 }
-
-var findWords = function (board, words) {
-  let res = [],
-    dic = buildTrie(words);
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[0].length; j++) {
-      dfs(board, i, j, dic, res);
-    }
-  }
-  return res;
-};
 ```
 
 ### Others
@@ -2106,26 +2132,6 @@ var connect = function (root) {
 };
 ```
 
-iteration: 利用 .next 层次遍历
-
-```js
-var connect = function (root) {
-  if (!root) return null;
-  let node = root,
-    next = null;
-  while (node && node.left) {
-    next = node;
-    while (next) {
-      next.left.next = next.right;
-      if (next.next) next.right.next = next.next.left;
-      next = next.next;
-    }
-    node = node.left;
-  }
-  return root;
-};
-```
-
 #### [Populating Next Right Pointers in Each Node II](https://leetcode.com/problems/populating-next-right-pointers-in-each-node-ii/)
 
 Given a binary tree.
@@ -2150,7 +2156,33 @@ const getChild = (node) => {
 };
 ```
 
+iteration
+
+```js
+var connect = function (root) {
+  if (!root) return null;
+  let q = [root];
+  while (q.length) {
+    let size = q.length,
+      prev = null;
+    while (size--) {
+      let node = q.shift();
+      node.next = null;
+      if (prev) {
+        prev.next = node;
+      }
+      prev = node;
+      if (node.left) q.push(node.left);
+      if (node.right) q.push(node.right);
+    }
+  }
+  return root;
+};
+```
+
 #### [Find Leaves of Binary Tree](https://github.com/grandyang/leetcode/issues/366)
+
+Given a binary tree, collect a tree's nodes as if you were doing this: Collect and remove all leaves, repeat until the tree is empty.
 
 ```js
 var findLeaves = function (root) {
@@ -2177,6 +2209,8 @@ function cut(root, curr) {
 
 #### [Distribute Coins in Binary Tree](https://leetcode.com/problems/distribute-coins-in-binary-tree/)
 
+You are given the root of a binary tree with n nodes where each node in the tree has node.val coins and there are n coins total. In one move, we may choose two adjacent nodes and move one coin from one node to another. (A move may be from parent to child, or from child to parent.) Return the number of moves required to make every node have exactly one coin.
+
 [return the balance of coins.](https://leetcode.com/problems/distribute-coins-in-binary-tree/discuss/221939/C%2B%2B-with-picture-post-order-traversal)
 
 ```js
@@ -2196,6 +2230,12 @@ var distributeCoins = function (root) {
 
 #### [Flip Equivalent Binary Trees](https://leetcode.com/problems/flip-equivalent-binary-trees/)
 
+For a binary tree T, we can define a flip operation as follows: choose any node, and swap the left and right child subtrees.
+
+A binary tree X is flip equivalent to a binary tree Y if and only if we can make X equal to Y after some number of flip operations.
+
+Given the roots of two binary trees root1 and root2, return true if the two trees are flip equivelent or false otherwise.
+
 ```js
 var flipEquiv = function (root1, root2) {
   if (!root1 || !root2) return root1 === root2;
@@ -2210,6 +2250,8 @@ var flipEquiv = function (root1, root2) {
 ```
 
 #### [Smallest Subtree with all the Deepest Nodes](https://leetcode.com/problems/smallest-subtree-with-all-the-deepest-nodes/)
+
+Return the smallest subtree such that it contains all the deepest nodes in the original tree. A node is called the deepest if it has the largest depth possible among any node in the entire tree. The subtree of a node is tree consisting of that node, plus the set of all descendants of that node.
 
 ```js
 var subtreeWithAllDeepest = function (root) {
@@ -2226,7 +2268,7 @@ var subtreeWithAllDeepest = function (root) {
 };
 ```
 
-#### [Construct Maximum Binary Tree](https://leetcode.com/problems/maximum-binary-tree/)
+#### [Maximum Binary Tree](https://leetcode.com/problems/maximum-binary-tree/)
 
 ```js
 var constructMaximumBinaryTree = function (nums) {
@@ -2288,30 +2330,6 @@ var findBottomLeftValue = function (root) {
 };
 ```
 
-#### [Kill Process](https://github.com/grandyang/leetcode/issues/582)
-
-```js
-function killProcess(pid, ppid, kill) {
-  let res = [],
-    map = {};
-  for (let i = 0; i < pid.length; i++) {
-    if (!map[ppid[i]]) map[ppid[i]] = [];
-    map[ppid[i]].push(pid[i]);
-  }
-  let queue = [kill];
-  while (queue.length) {
-    let node = queue.shift();
-    res.push(node);
-    if (map[node]) {
-      for (let child of map[node]) {
-        queue.push(child);
-      }
-    }
-  }
-  return res;
-}
-```
-
 #### [Convert Binary Search Tree to Sorted Doubly Linked List](https://github.com/grandyang/leetcode/issues/426)
 
 use prev pointer + inorder traversal
@@ -2357,100 +2375,11 @@ var findFrequentTreeSum = function (root) {
 };
 ```
 
-#### [All Nodes Distance K in Binary Tree](https://leetcode.com/problems/all-nodes-distance-k-in-binary-tree/)
-
-构建邻接表，然后 BFS。
-
-```js
-var distanceK = function (root, target, K) {
-  let adjs = build(null, root);
-  let nodes = [target.val],
-    seen = new Set(nodes);
-  for (let i = 0; i < K; i++) {
-    let curr = [];
-    for (let node of nodes) {
-      if (!adjs[node]) continue;
-      for (let next of adjs[node]) {
-        if (!seen.has(next)) {
-          curr.push(next);
-          seen.add(next);
-        }
-      }
-    }
-    nodes = curr;
-  }
-  return nodes;
-};
-
-function build(parent, child, adjs = []) {
-  if (parent && child) {
-    if (!adjs[parent.val]) adjs[parent.val] = [];
-    if (!adjs[child.val]) adjs[child.val] = [];
-    adjs[parent.val].push(child.val);
-    adjs[child.val].push(parent.val); // child => parent 因为 BFS 时还需要从 target node 向上递归
-  }
-  if (child.left) build(child, child.left, adjs);
-  if (child.right) build(child, child.right, adjs);
-  return adjs;
-}
-```
-
-recursion: 会修改 node，添加 parent 指针。
-
-```js
-var distanceK = function (root, target, K) {
-  if (!root) return [];
-  const node = findTarget(root, null, target);
-  return findAllKApart(node, K);
-};
-
-function findTarget(root, parent, target) {
-  if (!root) return null;
-  root.parent = parent;
-  if (root === target) {
-    return root;
-  }
-  return (
-    findTarget(root.left, root, target) || findTarget(root.right, root, target)
-  );
-}
-
-function findAllKApart(root, k, res = [], seen = new Set()) {
-  if (!root || seen.has(root.val)) return res;
-  if (k == 0) {
-    res.push(root.val);
-    return res;
-  }
-  seen.add(root.val);
-  findAllKApart(root.left, k - 1, res, seen);
-  findAllKApart(root.right, k - 1, res, seen);
-  findAllKApart(root.parent, k - 1, res, seen);
-  return res;
-}
-```
-
-#### [Split BST](https://github.com/grandyang/leetcode/issues/776)
-
-res[0]: node.val <= v; res[1]: node.val > v
-
-```js
-function splitBST(root, v) {
-  let res = [null, null];
-  if (!root) return res;
-  if (root.val <= v) {
-    res = splitBST(root.right, v);
-    root.right = res[0];
-    res[0] = root;
-  } else {
-    res = splitBST(root.left, v);
-    root.left = res[1];
-    res[1] = root;
-  }
-  return res;
-}
-```
-
 #### [Binary Tree Upside Down](https://github.com/grandyang/leetcode/issues/156)
+
+Given a binary tree where all the right nodes are either leaf nodes with a sibling (a left node that shares the same parent node) or empty, flip it upside down and turn it into a tree where the original right nodes turned into left leaf nodes. Return the new root.
+
+eg. Input: [1,2,3,4,5], Output: return the root of the binary tree [4,5,2,#,#,3,1]
 
 ```js
 function upsideDownBinaryTree(root) {
@@ -2501,7 +2430,29 @@ var pathSum = function (nums) {
 
 #### [Flatten Binary Tree to Linked List](https://leetcode.com/problems/flatten-binary-tree-to-linked-list/)
 
+The "linked list" should be in the same order as a pre-order traversal of the binary tree.
+
 将左子树的右分枝不断并入右子树前。
+
+recursion
+
+```js
+function flatten(root) {
+  if (!root) return null;
+  if (!root.left) {
+    root.right = flatten(root.right);
+    return root;
+  };
+  let l = flatten(root.left), node = l;
+  while (node && node.right) node = node.right;
+  node.right = flatten(root.right);
+  root.left = null;
+  root.right = l;
+  return root;
+}
+```
+
+iteration
 
 ```js
 var flatten = function (root) {
@@ -2520,6 +2471,32 @@ var flatten = function (root) {
 ```
 
 #### [Add One Row to Tree](https://leetcode.com/problems/add-one-row-to-tree/)
+
+iteration
+
+```js
+function addOneRow(root, v, d) {
+  if (d === 1) return new TreeNode(v, root);
+  let q = [root], depth = 1;
+  while (depth !== d - 1) {
+    let size = q.length;
+    while (size--) {
+      let node = q.shift();
+      if (node.left) q.push(node.left);
+      if (node.right) q.push(node.right);
+    }
+    depth++;
+  }
+  while (q.length) {
+    let node = q.shift(), l = node.left, r = node.right;
+    node.left = new TreeNode(v, l, null);
+    node.right = new TreeNode(v, null, r);
+  }
+  return root;
+}
+```
+
+recursion
 
 由于题目定义根节点 d = 1，所以递归终止 d = 0 or d = 1，处理 >= 2 的情况。
 
@@ -2560,7 +2537,9 @@ var smallestFromLeaf = (root, curr = "") => {
 
 #### [Flip Binary Tree To Match Preorder Traversal](https://leetcode.com/problems/flip-binary-tree-to-match-preorder-traversal/)
 
-需要 helper 函数判断是否能通过 flip 构成给定的 preorder 序列。
+You are given the root of a binary tree with n nodes, where each node is uniquely assigned a value from 1 to n; and a sequence of n values voyage, which is the desired pre-order traversal of the binary tree. Any node in the binary tree can be flipped by swapping its left and right subtrees.
+
+Flip the smallest number of nodes so that the pre-order traversal of the tree matches voyage. Return a list of the values of all flipped nodes.
 
 ```js
 var flipMatchVoyage = function (root, v) {
@@ -2582,7 +2561,9 @@ var flipMatchVoyage = function (root, v) {
 
 #### [Longest Univalue Path](https://leetcode.com/problems/longest-univalue-path/)
 
-[idea: same like Binary Tree Maximum Path Sum](https://leetcode.com/problems/longest-univalue-path/discuss/108136/JavaC%2B%2B-Clean-Code)
+Given the root of a binary tree, return the length of the longest path, where each node in the path has the same value. This path may or may not pass through the root.
+
+The length of the path between two nodes is represented by the number of edges between them.
 
 ```js
 var longestUnivaluePath = function (root) {
@@ -2600,6 +2581,8 @@ var longestUnivaluePath = function (root) {
   return max;
 };
 ```
+
+similar questions: Binary Tree Maximum Path Sum
 
 #### [Construct String from Binary Tree](https://leetcode.com/problems/construct-string-from-binary-tree/)
 
@@ -2628,6 +2611,9 @@ function str2tree(s) {
   if (groups === null) {
     return new TreeNode(parseInt(s));
   }
+  // groups[1]: ([0-9])+
+  // groups[3]: (.*) inside (\((.*)\))?
+  // groups[4]: (.*) inside \((.*)\)
   let root = new TreeNode(parseInt(groups[1]));
   if (groups[3] === undefined) {
     root.left = str2tree(groups[4]);
